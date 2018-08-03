@@ -52,17 +52,19 @@ def show_both_bundles(bundles, colors=None, show=True, fname=None):
         sleep(1)
         window.record(ren, n_frames=1, out_path=fname, size=(900, 900))
 
-def write_to_file(fname,data,indeces,comments=None):
+def write_to_file(fname,data,comments=None):
     data_txt=''
-    num=0
+    vert_num=0
+    indeces=[]
+    index=0
     with open(fname,'w') as f:
-        indeces=[]
         for fib in data:
-            #indeces.append()
+            indeces.append(len(fib)+index)
             for vert in fib:
                 data_txt+=str(vert[0])+' '+str(vert[1])+' '+str(vert[2])+'\n'
-                num+=1
-        f.write('ply\nformat ascii 1.0\ncomment DTI Tractography, produced by fiber-track\nelement vertices '+str(num))
+                vert_num+=1
+            index+=len(fib)
+        f.write('ply\nformat ascii 1.0\ncomment DTI Tractography, produced by fiber-track\nelement vertices '+str(vert_num))
         f.write('\nproperty float x\nproperty float y\nproperty float z\n')
         f.write('element fiber {}\nproperty int endindex'.format(len(indeces)))
         f.write('\nend_header\n'+data_txt)
