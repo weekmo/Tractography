@@ -12,7 +12,7 @@ data2 = read('../data/164939/m_ex_atr-left_shore.ply')
 # register_all('../data/')
 # aligned_bundle=register(traget_path= '../data/132118/m_ex_atr-left_shore.ply',
 # subject_path='../data/164939/m_ex_atr-left_shore.ply')
-aligned_bundle = register(target=data1,subjet=data2)
+aligned_bundle = register(target=data1, subject=data2)
 
 write('../data/test.ply',aligned_bundle)
 
