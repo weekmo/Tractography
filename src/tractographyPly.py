@@ -61,19 +61,39 @@ def write(fname,data,
     del data_txt
     del indeces
 
-def register(traget_path,subject_path,points=40):
+def register(target_path=None,subject_path=None,points=40,target=None,subjet=None):
     from dipy.align.streamlinear import StreamlineLinearRegistration
     from dipy.tracking.streamline import set_number_of_points
 
-    bundle1 = read(traget_path)
-    bundle2 = read(subject_path)
+    bundle1 = None
+    bundle2 = None
+
+    if target is not None:
+        bundle1 = target
+    elif target_path is not None:
+        bundle1 = read(target_path)
+    else:
+        raise ValueError("Please give a value to one of theses parameters,"+
+                         " target_path (file path on you system)"+
+                         " or target (List of bundles)")
+
+    if subjet is not None:
+        bundle2 = subjet
+    elif subject_path is not None:
+        bundle2 = read(subject_path)
+    else:
+        raise ValueError("Please give a value to one of theses parameters,"+
+                         " subject_path (file path on you system)"+
+                         " or subjet (List of bundles)")
 
     cb_subj1 = set_number_of_points(bundle1, points)
     cb_subj2 = set_number_of_points(bundle2, points)
 
     srr = StreamlineLinearRegistration()
     srm = srr.optimize(static=cb_subj1, moving=cb_subj2)
-
+    del cb_subj1
+    del cb_subj2
+    del bundle1
     return srm.transform(bundle2)
 
 def register_all(data_path):
@@ -100,3 +120,4 @@ def register_all(data_path):
                     aligned_subject=register(target_key+target_path,k+subject_path)
                     write(output_path+subject_path,aligned_subject)
         index+=1
+        del files_names
