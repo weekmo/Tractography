@@ -4,11 +4,11 @@ Created on 24 Jul 2018
 @author: mohammed
 '''
 #from dipy.tracking.streamline import transform_streamlines
-from tractographyPly import read,write_trk,show_bundles,register # ,register_all
+from tractographyPly import read_ply,write_trk,show_bundles,register # ,register_all
 from dipy.viz import window
 
-data1 = read('../data/132118/m_ex_atr-left_shore.ply')
-data2 = read('../data/150019/m_ex_atr-left_shore.ply')
+data1 = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+data2 = read_ply('../data/150019/m_ex_atr-left_shore.ply')
 
 # register_all('../data/')
 # aligned_bundle=register(traget_path= '../data/132118/m_ex_atr-left_shore.ply',

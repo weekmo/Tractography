@@ -1,5 +1,14 @@
+'''
+Created on 24 Jul 2018
 
-def read(fname):
+@author: mohammed
+'''
+def read_ply(fname):
+    """
+    Read ply file and return bundles data
+    :param fname:
+    :return:
+    """
     from plyfile import PlyData, PlyElement
     import numpy as np
 
@@ -19,6 +28,14 @@ def read(fname):
     return data
 
 def show_bundles(bundles, colors=None, show=True, fname=None):
+    """
+    Visualize and export bundles
+    :param bundles:
+    :param colors:
+    :param show:
+    :param fname:
+    :return:
+    """
     from dipy.viz import window, actor
     from time import sleep
 
@@ -38,6 +55,13 @@ def show_bundles(bundles, colors=None, show=True, fname=None):
 
 def write_ply(fname, data,
           comments=['DTI Tractography, produced by fiber-track']):
+    """
+    Write bundles to ply file
+    :param fname:
+    :param data:
+    :param comments:
+    :return:
+    """
     data_txt = ''
     vert_num = 0
     indeces = []
@@ -63,11 +87,26 @@ def write_ply(fname, data,
     del indeces
 
 def write_trk(fname,data):
+    """
+    Write bundles to trk file format
+    :param fname:
+    :param data:
+    :return:
+    """
     import numpy as np
     from dipy.io.streamline import save_trk
     save_trk(fname, streamlines=data, affine=np.eye(4))
 
 def register(target_path=None, subject_path=None, points=20, target=None, subject=None):
+    """
+    Register bundles
+    :param target_path:
+    :param subject_path:
+    :param points:
+    :param target:
+    :param subject:
+    :return:
+    """
     from dipy.align.streamlinear import StreamlineLinearRegistration
     from dipy.tracking.streamline import set_number_of_points
 
