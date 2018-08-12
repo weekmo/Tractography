@@ -1,3 +1,6 @@
+
+[![license - MIT](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
+
 # Tractograpy
 ## It is a module deals withe Brain Bundles
 It includes functions to read/write and register bundles<br/>
