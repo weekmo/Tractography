@@ -1,3 +1,4 @@
+
 def read(fname):
     from plyfile import PlyData, PlyElement
     import numpy as np
@@ -17,7 +18,6 @@ def read(fname):
     del ply
     return data
 
-
 def show_bundles(bundles, colors=None, show=True, fname=None):
     from dipy.viz import window, actor
     from time import sleep
@@ -36,8 +36,7 @@ def show_bundles(bundles, colors=None, show=True, fname=None):
         sleep(1)
         window.record(ren, n_frames=1, out_path=fname, size=(900, 900))
 
-
-def write(fname, data,
+def write_ply(fname, data,
           comments=['DTI Tractography, produced by fiber-track']):
     data_txt = ''
     vert_num = 0
@@ -63,6 +62,10 @@ def write(fname, data,
     del data_txt
     del indeces
 
+def write_trk(fname,data):
+    import numpy as np
+    from dipy.io.streamline import save_trk
+    save_trk(fname, streamlines=data, affine=np.eye(4))
 
 def register(target_path=None, subject_path=None, points=20, target=None, subject=None):
     from dipy.align.streamlinear import StreamlineLinearRegistration
@@ -96,8 +99,8 @@ def register(target_path=None, subject_path=None, points=20, target=None, subjec
     del cb_subj1
     del cb_subj2
     del bundle1
+    print(srm.matrix)
     return srm.transform(bundle2)
-
 
 def register_all(data_path):
     from os import listdir, mkdir
