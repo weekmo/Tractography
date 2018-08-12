@@ -1,9 +1,9 @@
-import setuptools
+from setuptools import setup, find_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name="tractography",
     version="1.0.0",
     author="Mohammed Abdelgadir",
@@ -11,7 +11,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/weekmo/registration",
-    packages=setuptools.find_packages(),
+    #package_dir={'': 'src'},
+    #packages=find_packages_ns(where='src'),
+    packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test"]),
     classifiers=(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

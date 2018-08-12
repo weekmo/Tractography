@@ -4,7 +4,7 @@ Created on 24 Jul 2018
 @author: mohammed
 '''
 #from dipy.tracking.streamline import transform_streamlines
-from src.tractography.tractography.io import read_ply,write_trk  # ,register_all
+from src.tractography.io import read_ply,write_trk  # ,register_all
 
 data1 = read_ply('../data/132118/m_ex_atr-left_shore.ply')
 data2 = read_ply('../data/150019/m_ex_atr-left_shore.ply')
