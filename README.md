@@ -1,5 +1,6 @@
 
-[![license - MIT](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
+[![license - GPL](https://img.shields.io/aur/license/yaourt.svg)](https://www.gnu.org/licenses/gpl-3.0.txt)
+
 
 # Tractograpy
 ## It is a module deals withe Brain Bundles
