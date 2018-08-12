@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tractography",
-    version="0.0.1",
+    version="1.0.0",
     author="Mohammed Abdelgadir",
-    description="Direct Bundle Registration",
+    description="The package deals with brain bundles images",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/weekmo/registration",
