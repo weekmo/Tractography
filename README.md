@@ -24,7 +24,7 @@ conda install -c weekmo tractography
 
 ```python
 
-from tractography.io import read_ply,write_trk,export_bundles  # ,register_all
+from tractography.io import read_ply,write_trk,export_bundles
 from tractography.registration import register
 from dipy.viz import window
 

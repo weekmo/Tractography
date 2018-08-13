@@ -62,24 +62,33 @@ def write_ply(fname, data,
     del indeces
 
 def write_trk(fname,data):
-    """
-    Write bundles to trk file format
-    :param fname:
-    :param data:
-    :return:
+
+    r""" Write bundles to trk file format
+
+    :param fname: str,
+        It is the output file name
+    :param data: List of numpy.ndarray,
+        The bundle to be written
+    :return: trk file,
+        Export images as trk file format
     """
     import numpy as np
     from dipy.io.streamline import save_trk
     save_trk(fname, streamlines=data, affine=np.eye(4))
 
 def export_bundles(bundles, colors=None, show=True, fname=None):
-    """
-    Visualize and export bundles
-    :param bundles:
-    :param colors:
-    :param show:
-    :param fname:
+
+    r""" Visualize and export bundles
+
+    :param bundles: List of numpy.ndarray,
+        Bundles to be exported
+    :param colors: window.colors
+    :param show: Boolean,
+        True to show the image(s) or False
+    :param fname: str,
+        Output file name
     :return:
+        Images file(s) and/or show them
     """
     from dipy.viz import window, actor
     from time import sleep
