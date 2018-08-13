@@ -1,12 +1,16 @@
 #!/usr/bin/python3.6
 from setuptools import setup, find_packages
+from shutil import copyfile
+from os import remove
+from time import sleep
 
+copyfile("../README.md","README.md")
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
     name="tractography",
-    version="1.0.5",
+    version="1.0.7",
     author="Mohammed Abdelgadir",
     description="The package deals with brain bundles images",
     long_description=long_description,
@@ -19,3 +23,5 @@ setup(
         "Operating System :: OS Independent",
     ),
 )
+sleep(10)
+remove("README.md")

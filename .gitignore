@@ -1,9 +1,8 @@
 build/
 dist/
+*.egg*
 .git/
 .idea/
 registration.iml
 data/
 __pycache__/
-*.egg*
-
