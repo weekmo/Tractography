@@ -2,15 +2,28 @@
 [![license - GPL](https://img.shields.io/aur/license/yaourt.svg)](https://www.gnu.org/licenses/gpl-3.0.txt)
 
 # Tractograpy
+
 ## It is a module deals withe Brain Bundles
-It includes functions to read/write and register bundles<br/>
+
+It includes functions to read/write and register bundles
+
 ## Installation:
+
 Easy to install by using
+
 ```commandline
 pip install tractography
 ```
+or
+
+```commandline
+conda install -c weekmo tractography
+```
+
 ## Example:
+
 ```python
+
 from tractography.io import read_ply,write_trk,export_bundles  # ,register_all
 from tractography.registration import register
 from dipy.viz import window
