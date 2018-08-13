@@ -9,12 +9,12 @@ It includes functions to read/write and register bundles
 
 ## Installation:
 
-Easy to install by using
+Easy to install by using pip (recommended)
 
 ```commandline
 pip install tractography
 ```
-or
+or conda
 
 ```commandline
 conda install -c weekmo tractography
