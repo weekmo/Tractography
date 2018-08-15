@@ -14,12 +14,12 @@ with open("README.md", "r") as fh:
 
 setup(
     name="tractography",
-    version="1.0.10",
+    version="1.0.11",
     author="Mohammed Abdelgadir",
     description="The package deals with brain bundles images",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/weekmo/registration",
+    url="https://weekmo.github.io/registration/",
     packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test"]),
     classifiers=(
         "Programming Language :: Python :: 3",
