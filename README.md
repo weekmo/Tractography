@@ -49,3 +49,4 @@ export_bundles([data1, aligned_bundle],
              show=False,
              fname='after_registration.png')
 ```
+Enjoy
