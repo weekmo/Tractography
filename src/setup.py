@@ -14,7 +14,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="tractography",
-    version="0.1.11",
+    version="0.1.12",
     author="Mohammed Abdelgadir",
     description="The package deals with brain bundles images",
     long_description=long_description,
