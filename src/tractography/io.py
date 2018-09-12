@@ -1,13 +1,18 @@
 #!/usr/bin/python3.6
-'''
+"""
 Created on 24 Jul 2018
 
 @author: mohammed
-'''
-def read_ply(fname):
+"""
+
+
+def read_ply(fname, xyz=[3, 4, 5]):
     """
     Read ply file and return bundles data
-    :param fname:
+    :param xyz: array,
+        the position of xyz in the file
+    :param fname: str,
+        File name
     :return:
     """
     from plyfile import PlyData, PlyElement
@@ -15,18 +20,19 @@ def read_ply(fname):
 
     ply = PlyData.read(fname)
     data = []
-    indeces = np.asarray([i[0] for i in ply.elements[1].data])
+    indices = np.asarray([i[0] for i in ply.elements[1].data])
     temp = []
     for i, item in enumerate(ply.elements[0].data):
         i += 1
-        temp.append([item[3], item[4], item[5]])
-        if i in indeces:
+        temp.append([item[xyz[0]], item[xyz[1]], item[xyz[2]]])
+        if i in indices:
             data.append(np.asarray(temp))
             temp = []
     del temp
-    del indeces
+    del indices
     del ply
     return data
+
 
 def write_ply(fname, data,
               comments=['DTI Tractography, produced by fiber-track']):
@@ -37,32 +43,25 @@ def write_ply(fname, data,
     :param comments:
     :return:
     """
-    data_txt = ''
-    vert_num = 0
-    indeces = []
-    index = 0
+    import numpy as np
+    indices_lenghts = np.array([len(i) for i in data])
     with open(fname, 'w') as f:
-        for fib in data:
-            index += len(fib)
-            indeces.append(index)
-            for vert in fib:
-                data_txt += str(vert[0]) + ' ' + str(vert[1]) + ' ' + str(vert[2]) + '\n'
-                vert_num += 1
         f.write('ply\nformat ascii 1.0\n')
         for com in comments:
             f.write('comment ' + com + '\n')
-        f.write('element vertices ' + str(vert_num))
+        f.write('element vertices ' + str(sum(indices_lenghts)))
         f.write('\nproperty float x\nproperty float y\nproperty float z\n')
-        f.write('element fiber {}\nproperty int endindex'.format(len(indeces)))
-        f.write('\nend_header\n' + data_txt)
-        for i in indeces:
-            f.write(str(i) + '\n')
+        f.write('element fiber {}\nproperty int endindex'.format(len(indices_lenghts)))
+        f.write('\nend_header\n')
+        for fib in data:
+            for vert in fib:
+                f.write(str(vert[0]) + ' ' + str(vert[1]) + ' ' + str(vert[2]) + '\n')
+        indices_lenghts = np.cumsum(indices_lenghts)
+        for i in indices_lenghts:
+            f.write(str(i)+'\n')
 
-    del data_txt
-    del indeces
 
-def write_trk(fname,data):
-
+def write_trk(fname, data):
     r""" Write bundles to trk file format
 
     :param fname: str,
@@ -76,8 +75,20 @@ def write_trk(fname,data):
     from dipy.io.streamline import save_trk
     save_trk(fname, streamlines=data, affine=np.eye(4))
 
-def export_bundles(bundles, colors=None, show=True, fname=None):
 
+def read_trk(fname):
+    r""" Read trk file
+
+    :param fname: str,
+        The file name to read
+    :return: void
+    """
+    from dipy.io.streamline import load_trk
+
+    return load_trk(fname)[0]
+
+
+def export_bundles(bundles, colors=None, show=True, fname=None):
     r""" Visualize and export bundles
 
     :param bundles: List of numpy.ndarray,
