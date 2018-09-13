@@ -5,27 +5,45 @@ Created on 24 Jul 2018
 @author: mohammed
 '''
 #from shutil import copyfile
+def transform_bundles(datain,mat):
+    new_data=[]
+    for fib in datain:
+        temp=[]
+        for  vert in fib:
+            vert = np.append(vert,1)
+            vert = np.matmul(vert,mat)
+            temp.append(vert[:-1])
+            #print(vert[:-1])
+        new_data.append(np.array(temp))
+    return new_data
+
 import numpy as np
 from dipy.tracking.streamline import transform_streamlines
 from src.tractography.io import read_ply,write_trk,write_ply
-from src.tractography.registration import register,register_all
+from src.tractography.registration import register
 
-data1 = read_ply('data/132118/m_ex_atr-left_shore.ply')
-data2 = read_ply('data/132118/m_ex_atr-right_shore.ply')
+data1 = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+data2 = read_ply('../data/132118/m_ex_atr-right_shore.ply')
 
 '''Fake registration'''
-mat = np.random.rand(4,4)*10
-mat[3,0],mat[3,1],mat[3,2],mat[3,3]=0,0,0,1
-print(mat)
-print(np.linalg.inv(mat))
-new_sl = transform_streamlines(data1,mat)
-write_ply('data/random_transformation.ply',new_sl)
-write_trk('data/random_transformation.trk',new_sl)
-new_sl=register(data1,new_sl)
-write_ply('data/realign_random.ply',new_sl)
-write_trk('data/realign_random.trk',new_sl)
-write_ply('data/terget.ply',data1)
+mat = np.eye(4)
 
+#mat = np.random.rand(4,4)*10
+#mat[3,0],mat[3,1],mat[3,2],mat[3,3]=0,0,0,1
+#print(mat)
+#print(np.linalg.inv(mat))
+#new_sl = transform_streamlines(data1,mat)
+new_sl = transform_bundles(data1,mat)
+#new_sl = data1.copy()
+#write_ply('data/random_transformation.ply',new_sl)
+#write_trk('data/random_transformation.trk',new_sl)
+new_sl,mt=register(data1,new_sl)
+new_sl,mt2=register(data1,new_sl)
+#write_ply('data/realign_random.ply',new_sl)
+#write_trk('data/realign_random.trk',new_sl)
+#write_ply('data/terget.ply',data1)
+print(mt,'\n',mt2)
+print(abs(mt-mt2))
 '''
 
 new_sl=register(data1,data2)

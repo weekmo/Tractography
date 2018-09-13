@@ -17,9 +17,8 @@ def register(target, subject,points=20):
         it is the target bundle witch will be moving during registration
     :param points: int,
         The bundles will be divided to this number
-    :return: List of numpy.ndarray,
-        It the aligned subject to target,
-        The function will print out the transformation matrix as well.
+    :return: List of numpy.ndarray, numpy.array
+        It return the aligned subject and transformation matrix as well.
     """
     from dipy.align.streamlinear import StreamlineLinearRegistration
     from dipy.tracking.streamline import set_number_of_points

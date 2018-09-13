@@ -33,7 +33,7 @@ def read_ply(fname, xyz=[3, 4, 5]):
     del ply
     return data
 
-
+#TODO upload changes to pip
 def write_ply(fname, data,
               comments=['DTI Tractography, produced by fiber-track']):
     """
