@@ -18,6 +18,7 @@ def transform_bundles(datain,mat):
     return new_data
 
 import numpy as np
+from time import time
 from dipy.tracking.streamline import transform_streamlines
 from src.tractography.io import read_ply,write_trk,write_ply
 from src.tractography.registration import register
@@ -32,8 +33,7 @@ mat = np.eye(4)
 #mat[3,0],mat[3,1],mat[3,2],mat[3,3]=0,0,0,1
 #print(mat)
 #print(np.linalg.inv(mat))
-#new_sl = transform_streamlines(data1,mat)
-new_sl = transform_bundles(data1,mat)
+new_sl = transform_streamlines(data1,mat)
 #new_sl = data1.copy()
 #write_ply('data/random_transformation.ply',new_sl)
 #write_trk('data/random_transformation.trk',new_sl)

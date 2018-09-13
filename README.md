@@ -33,7 +33,7 @@ data1 = read_ply('target.ply')
 data2 = read_ply('subject.ply')
 
 # Register bundle
-aligned_bundle = register(target=data1, subject=data2)
+aligned_bundle,mat = register(target=data1, subject=data2)
 
 # Write to trk file
 write_trk("aligned_bundle.trk", aligned_bundle)
