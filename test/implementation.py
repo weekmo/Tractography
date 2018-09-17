@@ -5,17 +5,6 @@ Created on 24 Jul 2018
 @author: mohammed
 '''
 #from shutil import copyfile
-def transform_bundles(datain,mat):
-    new_data=[]
-    for fib in datain:
-        temp=[]
-        for  vert in fib:
-            vert = np.append(vert,1)
-            vert = np.matmul(vert,mat)
-            temp.append(vert[:-1])
-            #print(vert[:-1])
-        new_data.append(np.array(temp))
-    return new_data
 
 import numpy as np
 from time import time

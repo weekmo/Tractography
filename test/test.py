@@ -23,7 +23,7 @@ def transform_bundles(datain,mat):
 
 x=transform_bundles(data1,np.eye(4))
 x=set_number_of_points(x,20)
-
+print(x)
 
 #data_1 = set_number_of_points(data1,20)
 #data_2 = set_number_of_points(data2,20)
