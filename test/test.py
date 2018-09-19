@@ -1,52 +1,51 @@
-#TODO change it to real test
-
-from src.tractography.io import read_ply#,write_ply
-from dipy.tracking.streamline import set_number_of_points
-import sys
 import numpy as np
+from scipy.optimize import minimize
+import matplotlib.pyplot as plt
+from src.tractography.viz import draw_brain
+from src.tractography.io import read_ply, write_ply
+from dipy.tracking.streamline import (unlist_streamlines,
+                                      center_streamlines,
+                                      set_number_of_points)
 
-data1=read_ply('../data/132118/m_ex_atr-left_shore.ply')
-#data2=read_ply('../data/150019/m_ex_atr-left_shore.ply')
-#data2=read_ply('../data/terget.ply',[0,1,2])
+target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+source = read_ply('../data/150019/m_ex_atr-left_shore.ply')
+new_target = set_number_of_points(target, 20)
+new_source = set_number_of_points(source, 20)
+centerd_source, shift1 = center_streamlines(new_source)
+centerd_target, shift2 = center_streamlines(new_target)
+# x,y = unlist_streamlines(target)
+# print(centerd)
+# draw_brain([centerd_source,centerd_target])
+primary = centerd_target[0]
+secondary = centerd_source[0]
 
-def transform_bundles(datain,mat):
-    new_data=[]
-    for fib in datain:
-        temp=[]
-        for  vert in fib:
-            vert = np.append(vert,1)
-            vert = np.matmul(vert,mat)
-            temp.append(vert[:-1])
-            #print(vert[:-1])
-        new_data.append(np.array(temp))
-    return new_data
 
-x=transform_bundles(data1,np.eye(4))
-x=set_number_of_points(x,20)
-print(x)
+n = primary.shape[0]
 
-#data_1 = set_number_of_points(data1,20)
-#data_2 = set_number_of_points(data2,20)
+pad = lambda x: np.hstack([x, np.ones((x.shape[0], 1))])
+unpad = lambda x: x[:,:-1]
+X = pad(primary)
+Y = pad(secondary)
 
-#print(data_1[0]*np.eye(4))
+# Solve the least squares problem X * A = Y
+# to find our transformation matrix A
+A, res, rank, s = np.linalg.lstsq(X, Y)
+transform = lambda x: unpad(np.dot(pad(x), A))
 '''
-match=[]
-for i in range(len(data_1)):
-    difr=sys.maxsize
-    #print(difr)
-    pos=-1,-1
-    for j in range(len(data_2)):
-        temp_dif=np.linalg.norm(data_1[i]-data_2[j])
-        #temp_dif = sum(sum(abs(data_1[i]-data_2[j])))
-        #print(temp_dif)
-        if temp_dif<difr:
-            difr=temp_dif
-            pos = i,j
-    match.append(pos)
+def dist(x):
+    return np.linalg.norm(x[0] - x[1], axis=1)
 
-#print(match)
-#print(match[0][0])
-print(data_1[match[0][0]])
-#print(match[0][1])
-print(data_2[match[0][1]])
+
+# m = cost(primary,secondary)
+# m = dist([primary,secondary])
+m = minimize(dist, [primary, secondary], method='Powell')
+#m = minimize(dist, [primary, secondary], maxiter=2000, full_output=True, method='Powell', args=(0.1, 0.2))
+# p = lambda x: np.hsplit(x,2)
+print(m.x)
+
+fig = plt.figure(figsize=(5,4),dpi=80)
+plt.plot(y,np.hsplit(primary,3)[2])
+plt.show()
 '''
+# print(p,primary)
+draw_brain([[transform(secondary)],[primary],[secondary]],[[1,0,0],[0,0,1],[.8,0,0]])

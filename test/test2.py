@@ -1,50 +1,48 @@
-
-
-# examples/Python/Tutorial/Basic/icp_registration.py
-
-from open3d import *
 import numpy as np
-import copy
+from dipy.tracking.streamline import transform_streamlines
+from src.tractography.viz import draw_brain
+from scipy.optimize import minimize
+"""
+primary = np.array([[40., 1160., 0.],
+                    [40., 40., 0.],
+                    [260., 40., 0.],
+                    [260., 1160., 0.]])
 
-def draw_registration_result(source, target, transformation):
-    source_temp = copy.deepcopy(source)
-    target_temp = copy.deepcopy(target)
-    source_temp.paint_uniform_color([1, 0.706, 0])
-    target_temp.paint_uniform_color([0, 0.651, 0.929])
-    source_temp.transform(transformation)
-    draw_geometries([source_temp, target_temp])
+secondary = np.array([[610., 560., 0.],
+                      [610., -560., 0.],
+                      [390., -560., 0.],
+                      [390., 560., 0.]])
+#primary = np.hstack([primary,np.ones((primary.shape[0],1))])
 
-if __name__ == "__main__":
-    source = read_point_cloud("../data/cloud_bin_0.pcd")
-    target = read_point_cloud("../data/cloud_bin_1.pcd")
-    threshold = 0.02
-    trans_init = np.asarray(
-        [[0.862, 0.011, -0.507,  0.5],
-         [-0.139, 0.967, -0.215,  0.7],
-         [0.487, 0.255,  0.835, -1.4],
-         [0.0, 0.0, 0.0, 1.0]])
-    #draw_registration_result(source, target, trans_init)
+x = np.array([[1,2,3],
+              [4,5,6],
+              [7,8,9],
+              [10,11,12],
+              [13,14,15],
+              [16,17,18]])
+#x =np.hstack([x,np.ones((x.shape[0],1))])
+print(x)
+A = np.eye(4)
+A[0,3] = 1
+print(transform_streamlines([x],A))
+"""
+x = np.array([[1,2,3],
+              [4,5,6],
+              [7,8,9],
+              [10,11,12],
+              [13,14,15],
+              [16,17,18]])
+y=x*2
+print(y)
+#draw_brain([[x],[y]])
 
-    print("Initial alignment")
-    evaluation = evaluate_registration(source, target,
-                                       threshold, trans_init)
-    print(evaluation)
-    print("")
-    """
-    print("Apply point-to-point ICP")
-    reg_p2p = registration_icp(source, target, threshold, trans_init,
-                               TransformationEstimationPointToPoint())#,
-                                #ICPConvergenceCriteria(max_iteration = 2000))
-    print(reg_p2p)
-    print("Transformation is:")
-    print(reg_p2p.transformation)
-    print("")
-    #draw_registration_result(source, target, reg_p2p.transformation)
-    """
-    print("Apply point-to-plane ICP")
-    reg_p2l = registration_icp(source, target, threshold, trans_init,
-                               TransformationEstimationPointToPlane())
-    print(reg_p2l)
-    print("Transformation is:")
-    print(reg_p2l.transformation)
-    #draw_registration_result(source, target, reg_p2l.transformation)
+def cost(x,y):
+    return np.sqrt(np.sum([(x[0]-y[0])**2,(x[1]-y[1])**2,(x[2]-y[2])**2]))
+
+
+m = minimize(cost,x,args=y,method = 'Powell')
+z=m.x.reshape((x.shape[0],3))
+print(z)
+draw_brain([[x],[y],[z]],[[1,0,0],[0,0,1],[.8,0,0]])
+#print(m.fun)
+#print(cost(x,y))

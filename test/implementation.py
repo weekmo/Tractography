@@ -4,61 +4,87 @@ Created on 24 Jul 2018
 
 @author: mohammed
 '''
-#from shutil import copyfile
 
-import numpy as np
-from time import time
-from dipy.tracking.streamline import transform_streamlines
-from src.tractography.io import read_ply,write_trk,write_ply
-from src.tractography.registration import register
 
-data1 = read_ply('../data/132118/m_ex_atr-left_shore.ply')
-data2 = read_ply('../data/132118/m_ex_atr-right_shore.ply')
+def fake_registration():
+    import numpy as np
+    from dipy.tracking.streamline import transform_streamlines
+    from src.tractography.io import read_ply
+    from src.tractography.registration import register
+    from src.tractography.viz import draw_brain
 
-'''Fake registration'''
-mat = np.eye(4)
+    target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
 
-#mat = np.random.rand(4,4)*10
-#mat[3,0],mat[3,1],mat[3,2],mat[3,3]=0,0,0,1
-#print(mat)
-#print(np.linalg.inv(mat))
-new_sl = transform_streamlines(data1,mat)
-#new_sl = data1.copy()
-#write_ply('data/random_transformation.ply',new_sl)
-#write_trk('data/random_transformation.trk',new_sl)
-new_sl,mt=register(data1,new_sl)
-new_sl,mt2=register(data1,new_sl)
-#write_ply('data/realign_random.ply',new_sl)
-#write_trk('data/realign_random.trk',new_sl)
-#write_ply('data/terget.ply',data1)
-print(mt,'\n',mt2)
-print(abs(mt-mt2))
-'''
+    '''Fake registration'''
+    '''Around X axis'''
+    mat = np.eye(4)
+    mat[1, 1] = mat[2, 2] = 0
+    mat[2, 1] = 1
+    mat[1, 2] = -1
 
-new_sl=register(data1,data2)
-write_ply('data/LTR_align.ply',new_sl)
-write_trk('data/LTR_align.trk',new_sl)
+    '''Around Y axis'''
+    mat1 = np.eye(4)
+    mat1[0, 0] = mat[2, 2] = 0
+    mat1[0, 2] = 1
+    mat1[2, 0] = -1
+    '''Around XY axes'''
+    mat1 = np.matmul(mat, mat1)
 
-write_ply('data/terget.ply',data1)
-write_trk('data/target.trk',data1)
-'''
-'''
-#register_all('data/')
-# write_trk("../data/my_streamlines0.trk", data1)
-r""" Test fake transformation matrix
-mat = np.random.rand(4,4)*10
-mat[3,0],mat[3,1],mat[3,2],mat[3,3]=0,0,0,1
-print("Trans Mat:\n",mat)
-test_same_bundle=transform_streamlines(data1,mat)
+    subject_before_registration = transform_streamlines(target, mat1)
+    subject_after_registration, _ = register(target, subject_before_registration)
 
-r""" Show
-show_bundles([data1, test_same_bundle],
-                  colors=[window.colors.orange, window.colors.blue],
-                  show=False,
-                  fname='../data/before_registration.png')
+    '''Move combinations apart'''
+    mat2 = np.eye(4)
+    mat2[0, 3] = 70
 
-show_bundles([data1, after],
-                  colors=[window.colors.orange, window.colors.blue],
-                  show=False,
-                  fname='../data/after_registration.png')
-'''
+    moved_target = transform_streamlines(target, mat2)
+    subject_after_registration = transform_streamlines(subject_after_registration, mat2)
+
+    draw_brain([target, subject_before_registration, moved_target, subject_after_registration],
+               [[1, 0, 0], [0, 0, 1], [.7, 0, 0], [0, 0, .7]])
+
+
+def left_to_right():
+    import numpy as np
+    from dipy.tracking.streamline import transform_streamlines
+    from src.tractography.io import read_ply  # ,write_trk,write_ply
+    from src.tractography.registration import register
+    from src.tractography.viz import draw_brain
+
+    target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+    subject = read_ply('../data/132118/m_ex_atr-right_shore.ply')
+
+    subject_after, _ = register(target, subject)
+
+    mat = np.eye(4)
+    mat[0, 3] = 100
+    moved_target = transform_streamlines(target, mat)
+    subject_after = transform_streamlines(subject_after, mat)
+
+    draw_brain([target, subject, moved_target, subject_after],
+               [[1, 0, 0], [0, 0, 1], [.7, 0, 0], [0, 0, .7]])
+
+
+def normal_registration():
+    import numpy as np
+    from dipy.tracking.streamline import transform_streamlines
+    from src.tractography.io import read_ply  # ,write_trk,write_ply
+    from src.tractography.registration import register
+    from src.tractography.viz import draw_brain
+
+    target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+    subject = read_ply('../data/150019/m_ex_atr-left_shore.ply')
+
+    subject_after, _ = register(target, subject)
+
+    mat = np.eye(4)
+    mat[0, 3] = 70
+    moved_target = transform_streamlines(target, mat)
+    subject_after = transform_streamlines(subject_after, mat)
+
+    draw_brain([target, subject, moved_target, subject_after],
+               [[1, 0, 0], [0, 0, 1], [.7, 0, 0], [0, 0, .7]])
+
+#normal_registration()
+#realigne_bundle()
+#left_to_right()

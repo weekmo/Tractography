@@ -33,7 +33,7 @@ def read_ply(fname, xyz=[3, 4, 5]):
     del ply
     return data
 
-#TODO upload changes to pip
+
 def write_ply(fname, data,
               comments=['DTI Tractography, produced by fiber-track']):
     """
@@ -43,22 +43,20 @@ def write_ply(fname, data,
     :param comments:
     :return:
     """
-    import numpy as np
-    indices_lenghts = np.array([len(i) for i in data])
+    from dipy.tracking.streamline import unlist_streamlines
+    points, idx = unlist_streamlines(data)
     with open(fname, 'w') as f:
         f.write('ply\nformat ascii 1.0\n')
         for com in comments:
             f.write('comment ' + com + '\n')
-        f.write('element vertices ' + str(sum(indices_lenghts)))
+        f.write('element vertices ' + str(len(points)))
         f.write('\nproperty float x\nproperty float y\nproperty float z\n')
-        f.write('element fiber {}\nproperty int endindex'.format(len(indices_lenghts)))
+        f.write('element fiber {}\nproperty int endindex'.format(len(idx)))
         f.write('\nend_header\n')
-        for fib in data:
-            for vert in fib:
-                f.write(str(vert[0]) + ' ' + str(vert[1]) + ' ' + str(vert[2]) + '\n')
-        indices_lenghts = np.cumsum(indices_lenghts)
-        for i in indices_lenghts:
-            f.write(str(i)+'\n')
+        for vert in points:
+            f.write(str(vert[0]) + ' ' + str(vert[1]) + ' ' + str(vert[2]) + '\n')
+        for i in idx:
+            f.write(str(i) + '\n')
 
 
 def write_trk(fname, data):

@@ -28,19 +28,21 @@ def export_bundles(bundles, colors=None, show=True, fname=None):
         sleep(1)
         window.record(ren, n_frames=1, out_path=fname, size=(900, 900))
 
-def draw_brain(bundles_list):
-    from open3d import LineSet,Vector3dVector,Vector2iVector,draw_geometries
+
+def draw_brain(bundles_list, colour_list=[]):
+    from open3d import LineSet, Vector3dVector, Vector2iVector, draw_geometries
     from random import random
-    import numpy as np
     bundles = []
-    for bundle in bundles_list:
-        color = [random(), random(), random()]
-        #color = [0, 0, .8]
+    for idx, bundle in enumerate(bundles_list):
+        if len(colour_list) < 1:
+            colour_list = [[random(),random(),random()] for _ in range(len(bundles_list))]
+        assert len(bundles_list) == len(colour_list)
+        colour = colour_list[idx]
         for points in bundle:
-            lines = [[i, i + 1] for i in range(len(points)-1)]
+            lines = [[i, i + 1] for i in range(len(points) - 1)]
             data_line = LineSet()
             data_line.points = Vector3dVector(points)
             data_line.lines = Vector2iVector(lines)
-            data_line.colors = Vector3dVector([color for i in range(len(lines))])
+            data_line.colors = Vector3dVector([colour for _ in range(len(lines))])
             bundles.append(data_line)
     draw_geometries(bundles)
