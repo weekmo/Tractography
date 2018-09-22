@@ -85,6 +85,6 @@ def normal_registration():
     draw_brain([target, subject, moved_target, subject_after],
                [[1, 0, 0], [0, 0, 1], [.7, 0, 0], [0, 0, .7]])
 
-#normal_registration()
-#realigne_bundle()
-#left_to_right()
+
+def distance(self, x0):
+    return self.distance_kdtree(x0, self.new_static, self.new_moving)
