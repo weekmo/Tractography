@@ -16,27 +16,37 @@ def original_transform():
     target = read_ply('../data/m_ex_atr-left_shore.ply')
     subject = read_ply('../data/m_ex_atr-right_shore.ply')
 
+    # Move and rotate the subject
     subject = transform_streamlines(subject, mat)
 
-    target_T = set_number_of_points(target, 20)
+    # Reduce # of points
+    # target_T = set_number_of_points(target, 20)
     subject_T = set_number_of_points(subject, 20)
 
+    # Concatenate bundles to calculate
+    # singular vectors and mid point
     con_target = np.concatenate(target)
     con_subject = np.concatenate(subject)
 
-    pca = PCA(n_components=3)
-
-    pca = pca.fit(con_target)
-    target_T=pca.transform(target_T)
-    """
-    pca = pca.fit(con_subject)
+    # Move the subject to the origin
     mean = np.mean(con_subject, axis=0)
     subject_T = subject_T - mean
+
+    # Move the subject to the target
+    mean = np.mean(con_target, axis=0)
+    subject_T = subject_T + mean
+
+    pca = PCA(n_components=3)
+
+    pca = pca.fit(con_subject)
     subject_T = np.dot(subject_T, pca.components_.T)
 
-    draw_brain([target, subject, target_T, subject_T],
-              [[1, 0, 0], [0, 0, 1], [.8, 0, 0], [0, 0, .8]])
-    """
+    pca = pca.fit(con_target)
+    subject_T = np.dot(subject_T, -pca.components_.T)
+
+    draw_brain([target, subject, subject_T],
+               [[0, 0, 1], [1, 0, 0], [.7, 0, 0]])
+
 
 def dot_transformation():
     mat = compose_matrix44([0, 0, 0, 90, 90, 90])
@@ -73,7 +83,9 @@ def dot_transformation():
     #draw_brain([target, subject, target_T, subject_T],
     #           [[1, 0, 0], [0, 0, 1], [.8, 0, 0], [0, 0, .8]])
 
+original_transform()
 
+"""
 def rdm_data_test():
     np.random.seed(5)
     x = np.random.random((5, 3))
@@ -141,10 +153,7 @@ def curve():
     result = np.hstack((x,y,z))
     #print(zaxis)
     draw_brain([[result],[xaxis],[yaxis],[zaxis]])
-# rdm_data_test()
-# angles()
-dot_transformation()
-"""
+
 x = np.random.random((20,3))
 val,vec = np.linalg.eig(x)
 print(vec)
