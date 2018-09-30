@@ -4,9 +4,20 @@ Created on 24 Jul 2018
 
 @author: mohammed
 '''
+import time
+import numpy as np
+from os import listdir, mkdir
+from os.path import isfile, isdir
+
+from dipy.align.streamlinear import StreamlineLinearRegistration, compose_matrix44
+from dipy.tracking.streamline import set_number_of_points, transform_streamlines, center_streamlines
+from dipy.core.optimize import Optimizer
+
+from .Utils import pca_transform, distance_kdtree
+from .io import read_ply, write_trk, write_ply
 
 
-def register(target, subject, points=20):
+def register(static, moving, points=20):
     r""" Make StreamlineLinearRegistration simpler to use
 
     Parameters:
@@ -20,18 +31,16 @@ def register(target, subject, points=20):
     :return: List of numpy.ndarray, numpy.array
         It return the aligned subject and transformation matrix as well.
     """
-    from dipy.align.streamlinear import StreamlineLinearRegistration
-    from dipy.tracking.streamline import set_number_of_points
 
-    cb_subj1 = set_number_of_points(target, points)
-    cb_subj2 = set_number_of_points(subject, points)
+    cb_subj1 = set_number_of_points(static, points)
+    cb_subj2 = set_number_of_points(moving, points)
 
     srr = StreamlineLinearRegistration()
     srm = srr.optimize(static=cb_subj1, moving=cb_subj2)
     del cb_subj1
     del cb_subj2
-    del target
-    return srm.transform(subject), srm.matrix
+    del static
+    return srm.transform(moving), srm.matrix
 
 
 def register_all(data_path):
@@ -44,10 +53,6 @@ def register_all(data_path):
     :return: files,
         It wil export aligned subject to trk files each in a new folder as the same name as subject plus _out
     """
-    import time
-    from os import listdir, mkdir
-    from os.path import isfile, isdir
-    from tractography.io import read_ply, write_trk, write_ply
 
     time_list = {}
     dirs = [dir for dir in listdir(data_path)]
@@ -66,7 +71,7 @@ def register_all(data_path):
                 subject = read_ply(subject_path)
                 time_list[f]['Loading Subject ' + dirs[i]] = time.clock() - start_time
                 start_time = time.clock()
-                aligned_subject = register(target=target, subject=subject)
+                aligned_subject = register(target, subject)
                 time_list[f]['Align Subject ' + dirs[i]] = time.clock() - start_time
                 start_time = time.clock()
                 write_ply(out_path, aligned_subject)
@@ -84,10 +89,23 @@ def register_all(data_path):
     return time_list
 
 
-# Done centralise two bundles to origin and return affine matrix
-# TODO use PCA to get eigen vectors in each bundle and align them depend on eigen vectors and return affine matrix
-# Done knn or kd tree to find the closest point for each point in the target to a point in the subject
-# Done calculate the sum of euclidean distances between points in bundles
-# from dipy.segment.metric import mdf
-# Done minimise the distance by using optimiser and return affine matrix
-# TODO create ICP registration function by combining all the above steps
+def registration_icp(static, moving, points=20, pca=True, maxiter=100000):
+    options = {'maxcor': 10, 'ftol': 1e-7,
+               'gtol': 1e-5, 'eps': 1e-8,
+               'maxiter': maxiter}
+    if pca:
+        static = pca_transform(static, moving)
+    else:
+        mean_m = np.mean(np.concatenate(moving), axis=0)
+        mean_s = np.mean(np.concatenate(static), axis=0)
+        moving = [i - mean_m + mean_s for i in moving]
+    original_moving = moving.copy()
+    static = set_number_of_points(static, points)
+    moving = set_number_of_points(moving, points)
+
+    m = Optimizer(distance_kdtree, [0, 0, 0, 0, 0, 0], args=(static, moving), method='L-BFGS-B',
+                  options=options)
+
+    m.print_summary()
+    mat = compose_matrix44(m.xopt)
+    return transform_streamlines(original_moving,mat)

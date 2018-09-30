@@ -4,7 +4,10 @@ Created on 24 Jul 2018
 
 @author: mohammed
 """
-
+import numpy as np
+from plyfile import PlyData, PlyElement
+from dipy.tracking.streamline import unlist_streamlines
+from dipy.io.streamline import save_trk,load_trk
 
 def read_ply(fname, xyz=[3, 4, 5]):
     """
@@ -15,8 +18,6 @@ def read_ply(fname, xyz=[3, 4, 5]):
         File name
     :return:
     """
-    from plyfile import PlyData, PlyElement
-    import numpy as np
 
     ply = PlyData.read(fname)
     data = []
@@ -43,7 +44,6 @@ def write_ply(fname, data,
     :param comments:
     :return:
     """
-    from dipy.tracking.streamline import unlist_streamlines
     points, idx = unlist_streamlines(data)
     with open(fname, 'w') as f:
         f.write('ply\nformat ascii 1.0\n')
@@ -69,8 +69,6 @@ def write_trk(fname, data):
     :return: trk file,
         Export images as trk file format
     """
-    import numpy as np
-    from dipy.io.streamline import save_trk
     save_trk(fname, streamlines=data, affine=np.eye(4))
 
 
@@ -81,6 +79,5 @@ def read_trk(fname):
         The file name to read
     :return: void
     """
-    from dipy.io.streamline import load_trk
 
     return load_trk(fname)[0]

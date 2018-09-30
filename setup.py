@@ -21,7 +21,8 @@ setup(
         'plyfile',
         'numpy',
         'dipy',
-        'open3d-official'
+        'open3d-official',
+        'sklearn'
     ]
 )
 """
