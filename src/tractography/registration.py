@@ -13,7 +13,7 @@ from dipy.align.streamlinear import StreamlineLinearRegistration, compose_matrix
 from dipy.tracking.streamline import set_number_of_points, transform_streamlines, center_streamlines
 from dipy.core.optimize import Optimizer
 
-from .Utils import pca_transform, distance_kdtree
+from .Utils import pca_transform,distance_kdTree9D
 from .io import read_ply, write_trk, write_ply
 
 
@@ -22,9 +22,9 @@ def register(static, moving, points=20):
 
     Parameters:
     ----------
-    :param target: List of numpy.ndarray,
+    :param static: List of numpy.ndarray,
         it is the target bundle witch will be static during registration
-    :param subject:List of numpy.ndarray,
+    :param moving:List of numpy.ndarray,
         it is the target bundle witch will be moving during registration
     :param points: int,
         The bundles will be divided to this number
@@ -40,7 +40,7 @@ def register(static, moving, points=20):
     del cb_subj1
     del cb_subj2
     del static
-    return srm.transform(moving), srm.matrix
+    return srm.transform(moving)#, srm.matrix
 
 
 def register_all(data_path):
@@ -89,12 +89,14 @@ def register_all(data_path):
     return time_list
 
 
-def registration_icp(static, moving, points=20, pca=True, maxiter=100000):
+def registration_icp(static, moving,
+                     points=20, pca=True, maxiter=100000,
+                     affine=[0, 0, 0, 0, 0, 0]):
     options = {'maxcor': 10, 'ftol': 1e-7,
                'gtol': 1e-5, 'eps': 1e-8,
                'maxiter': maxiter}
     if pca:
-        static = pca_transform(static, moving)
+        moving = pca_transform(static, moving,points)
     else:
         mean_m = np.mean(np.concatenate(moving), axis=0)
         mean_s = np.mean(np.concatenate(static), axis=0)
@@ -103,9 +105,11 @@ def registration_icp(static, moving, points=20, pca=True, maxiter=100000):
     static = set_number_of_points(static, points)
     moving = set_number_of_points(moving, points)
 
-    m = Optimizer(distance_kdtree, [0, 0, 0, 0, 0, 0], args=(static, moving), method='L-BFGS-B',
+    m = Optimizer(distance_kdTree9D, affine,
+                  args=(static, moving),
+                  method='L-BFGS-B',
                   options=options)
 
     m.print_summary()
     mat = compose_matrix44(m.xopt)
-    return transform_streamlines(original_moving,mat)
+    return transform_streamlines(original_moving, mat)

@@ -10,6 +10,7 @@ from dipy.align.streamlinear import compose_matrix44
 from src.tractography.io import read_ply
 from src.tractography.registration import register,registration_icp
 from src.tractography.viz import draw_brain
+from src.tractography.Utils import pca_transform
 
 
 def fake_registration():
@@ -43,10 +44,13 @@ def normal_registration():
                [[1, 0, 0], [0, 0, 1], [0, 0, .7]])
 
 def icp_registration():
-    target = read_ply('../data/164939/m_ex_atr-left_shore.ply')
-    subject = read_ply('../data/150019/m_ex_atr-left_shore.ply')
+    mat = compose_matrix44([50, 20, 20, 180, 90, 90,5])
+    subject = read_ply('../data/164939/m_ex_atr-left_shore.ply')
+    #subject = read_ply('../data/150019/m_ex_atr-left_shore.ply')
+    target = transform_streamlines(subject, mat)
 
-    subject_T=registration_icp(static=target,moving=subject,pca=False)
-    draw_brain([target,subject_T],[[1,0,0],[0,0,1]])
+    subject_T = pca_transform(target,subject)
+    #subject_T=registration_icp(static=target,moving=subject,pca=True)
+    draw_brain([target,subject_T,subject],[[1,0,0],[0,0,1],[0,0,.7]])
 
 icp_registration()

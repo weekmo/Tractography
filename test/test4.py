@@ -12,6 +12,7 @@ from dipy.tracking.streamline import (unlist_streamlines,
 from time import time
 from src.tractography.registration import registration_icp
 
+
 def original_transform():
     mat = compose_matrix44([20, 20, 20, 180, 90, 90])
     target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
@@ -53,15 +54,15 @@ def original_transform():
 
 def dot_transformation():
     # mat = compose_matrix44([0, 0, 0, 90, 90, 90])
-    mat = compose_matrix44([50, 20, 20,180,90,90])
+    mat = compose_matrix44([50, 20, 20, 180, 90, 90])
     target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
-    #subject = read_ply('../data/164939/m_ex_atr-left_shore.ply')
+    # subject = read_ply('../data/164939/m_ex_atr-left_shore.ply')
 
     subject = transform_streamlines(target, mat)
 
-    #target_T = set_number_of_points(target, 20)
+    # target_T = set_number_of_points(target, 20)
     subject_T = set_number_of_points(subject, 20)
-    #subject_T = subject
+    # subject_T = subject
 
     con_target = np.concatenate(target)
     con_subject = np.concatenate(subject)
@@ -92,10 +93,12 @@ def dot_transformation():
     """
     draw_brain([target, subject, subject_T],
                [[1, 0, 0], [0, 0, 1], [0, 0, .8]])
-#dot_transformation()
+
+
+# dot_transformation()
 
 def new_pca():
-    mat = compose_matrix44([50, 20, 20,180,90,90])
+    mat = compose_matrix44([50, 20, 20, 180, 90, 90])
     target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
     # subject = read_ply('../data/164939/m_ex_atr-left_shore.ply')
 
@@ -112,17 +115,18 @@ def new_pca():
     pca = pca.fit(con_target)
     mat2 = pca.components_
 
-    aff = np.dot(mat1,mat2)
-    subject_T = [np.dot(i,aff) for i in subject]
+    aff = np.dot(mat1, mat2)
+    subject_T = [np.dot(i, aff) for i in subject]
 
-    center3 = np.mean(con_target, axis=0)-np.mean(np.concatenate(subject_T), axis=0)
-    subject_T =  [s +center3 for s in subject_T]
+    center3 = np.mean(con_target, axis=0) - np.mean(np.concatenate(subject_T), axis=0)
+    subject_T = [s + center3 for s in subject_T]
     print(time() - start)
-    #draw_brain([target, subject,subject_T],
+    # draw_brain([target, subject,subject_T],
     #           [[1, 0, 0], [0, 0, 1], [0, 0, .8]])
 
+
 def new_pca2():
-    mat = compose_matrix44([50, 20, 20,180,90,90])
+    mat = compose_matrix44([50, 20, 20, 180, 90, 90])
     target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
     subject = read_ply('../data/197348/m_ex_atr-left_shore.ply')
 
@@ -139,36 +143,39 @@ def new_pca2():
     pca = pca.fit(con_target)
     mat2 = pca.components_
 
-    aff = np.dot(mat1,mat2)
+    aff = np.dot(mat1, mat2)
 
-    mean_s = np.mean(con_subject,axis=0)
-    mean_t = np.mean(con_target,axis=0)
-    subject_T = [np.dot((i-mean_s),aff)+mean_t for i in subject]
+    mean_s = np.mean(con_subject, axis=0)
+    mean_t = np.mean(con_target, axis=0)
+    subject_T = [np.dot((i - mean_s), aff) + mean_t for i in subject]
 
     print(time() - start)
-    draw_brain([target, subject,subject_T],
-              [[1, 0, 0], [0, 0, 1], [0, 0, .8]])
-#new_pca()
-#new_pca2()
+    draw_brain([target, subject, subject_T],
+               [[1, 0, 0], [0, 0, 1], [0, 0, .8]])
+
+
+# new_pca()
+# new_pca2()
 def test_pca():
-    mat = compose_matrix44([50, 20, 20])
+    # mat = compose_matrix44([50, 20, 20])
     target = read_ply('../data/164939/m_ex_atr-left_shore.ply')
     subject = read_ply('../data/150019/m_ex_atr-left_shore.ply')
 
-    #subject = transform_streamlines(target, mat)
-    subject_T=registration_icp(static=target,moving=subject,pca=False)
-    draw_brain([subject_T,target])
-    #print(len(subject_T))
-    #register1 = Registration(static=target,moving=subject)
-    #subject_T = register1.optimize(pca=False)
-    #mean_m = np.mean(np.concatenate(subject),axis=0)
-    #mean_s = np.mean(np.concatenate(target),axis=0)
-    #subject_T=[i-mean_m+mean_s for i in subject]
+    # subject = transform_streamlines(target, mat)
+    # subject_T=registration_icp(static=target,moving=subject,pca=False)
+    draw_brain([target, subject])
+    # print(len(subject_T))
+    # register1 = Registration(static=target,moving=subject)
+    # subject_T = register1.optimize(pca=False)
+    # mean_m = np.mean(np.concatenate(subject),axis=0)
+    # mean_s = np.mean(np.concatenate(target),axis=0)
+    # subject_T=[i-mean_m+mean_s for i in subject]
 
-    #subject_R,_ = register(target,subject)
-    #draw_brain([target, subject,subject_T,subject_R],
+    # subject_R,_ = register(target,subject)
+    # draw_brain([target, subject,subject_T,subject_R],
     #           [[1, 0, 0], [0, 0, 1], [1, 1, 0],[1,1,0]])
-    #draw_brain([target, subject,subject_T],[[1, .7, .7], [0, 0, 1], [1,0 , 0]])
+    # draw_brain([target, subject,subject_T],[[1, .7, .7], [0, 0, 1], [1,0 , 0]])
+
 
 test_pca()
 """
