@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 from dipy.segment.quickbundles import bundles_distances_mdf
-from dipy.tracking.streamline import transform_streamlines,set_number_of_points
+from dipy.tracking.streamline import transform_streamlines, set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
 from sklearn.neighbors import KDTree
 from sklearn.decomposition import PCA
@@ -34,6 +34,7 @@ def distance_mdf(x0, static, moving):
     return cost
 
 
+# It uses point cloud
 def distance_kdtree(x0, static, moving):
     # joint bundles
     affine = compose_matrix44(x0)
@@ -43,6 +44,7 @@ def distance_kdtree(x0, static, moving):
     return cost
 
 
+# It uses tracts distance
 def distance_kdTree9D(x0, static, moving):
     affine = compose_matrix44(x0)
     moving = transform_streamlines(moving, affine)
@@ -51,14 +53,19 @@ def distance_kdTree9D(x0, static, moving):
     new_moving = make9D(moving)
 
     tree = KDTree(new_moving)
-    idx = np.hstack(tree.query(new_static, k=1)[1])
-
-    moving = np.array(moving)[idx]
-    cost = np.sum(np.linalg.norm(static - moving,axis=2))
+    cost = np.sum(tree.query(new_static, k=1)[0])
     return cost
 
 
-def pca_transform(static, moving,points=20):
+def distance_pc_clusering(x0, static, moving):
+    affine = compose_matrix44(x0)
+    moving = transform_streamlines(moving, affine)
+    tree = KDTree(np.concatenate(moving))
+    cost = np.sum(tree.query(np.concatenate(static), k=1)[0])
+    return cost
+
+
+def pca_transform(static, moving, points=20):
     con_target = np.concatenate(static)
     con_subject = np.concatenate(moving)
 
@@ -72,20 +79,18 @@ def pca_transform(static, moving,points=20):
 
     aff = np.dot(prev, pca.components_)
 
-    idx = [[],[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2]]
+    idx = [[], [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]]
     min = sys.maxsize
     for i in idx:
         aff2 = np.copy(aff)
         aff2[:, i] *= -1
         new_moving = [np.dot((i - mean_s), aff2) + mean_t for i in moving]
-        moving_x = set_number_of_points(new_moving, points)
-        static_x = set_number_of_points(static, points)
-        cost = distance_kdTree9D([0, 0, 0], moving_x, static_x)
-        # print(aff2,cost)
+        cost = distance_kdTree9D([0, 0, 0], new_moving, static)
+        # print(cost)
         if cost < min:
             new_move = new_moving
             min = cost
-    # print(aff,min)
+    # print(min)
     del new_moving
     del min
     del pca
@@ -96,6 +101,4 @@ def pca_transform(static, moving,points=20):
     del con_subject
     del aff
     del aff2
-    del moving_x
-    del static_x
     return new_move
