@@ -3,7 +3,10 @@ import sys
 from dipy.segment.quickbundles import bundles_distances_mdf
 from dipy.tracking.streamline import transform_streamlines, set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
+
 from sklearn.neighbors import KDTree
+from sklearn.cluster import KMeans
+from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.decomposition import PCA
 
 
@@ -57,12 +60,26 @@ def distance_kdTree9D(x0, static, moving):
     return cost
 
 
-def distance_pc_clusering(x0, static, moving):
-    affine = compose_matrix44(x0)
-    moving = transform_streamlines(moving, affine)
-    tree = KDTree(np.concatenate(moving))
-    cost = np.sum(tree.query(np.concatenate(static), k=1)[0])
-    return cost
+class Clustering:
+
+    def __init__(self):
+        self.inint_dist = np.zeros((3,3))
+
+    def distance_pc_clusering(self,x0,static,moving,c_num=3,k=20):
+        affine = compose_matrix44(x0)
+        moving = transform_streamlines(moving, affine)
+
+        con_static = np.concatenate(static)
+        con_moving = np.concatenate(moving)
+
+        tree = KDTree(con_moving)
+        cost = np.sum(tree.query(con_static, k=1)[0])
+
+        kmeans = KMeans(c_num).fit(con_moving)
+        cost1 = np.linalg.norm((euclidean_distances(kmeans.cluster_centers_) - euclidean_distances(self.inint_dist))/2)
+        self.inint_dist = kmeans.cluster_centers_
+        # print(self.inint_dist)
+        return cost+k*cost1
 
 
 def pca_transform(static, moving, points=20):

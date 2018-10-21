@@ -13,7 +13,7 @@ from dipy.align.streamlinear import StreamlineLinearRegistration, compose_matrix
 from dipy.tracking.streamline import set_number_of_points, transform_streamlines, center_streamlines
 from dipy.core.optimize import Optimizer
 
-from .Utils import pca_transform,distance_kdTree9D
+from .Utils import pca_transform,distance_kdTree9D,Clustering
 from .io import read_ply, write_trk, write_ply
 
 
@@ -91,7 +91,7 @@ def register_all(data_path):
 
 def registration_icp(static, moving,
                      points=20, pca=True, maxiter=100000,
-                     affine=[0, 0, 0, 0, 0, 0]):
+                     affine=[0, 0, 0, 0, 0, 0],clustering=True):
     options = {'maxcor': 10, 'ftol': 1e-7,
                'gtol': 1e-5, 'eps': 1e-8,
                'maxiter': maxiter}
@@ -101,11 +101,15 @@ def registration_icp(static, moving,
         mean_m = np.mean(np.concatenate(moving), axis=0)
         mean_s = np.mean(np.concatenate(static), axis=0)
         moving = [i - mean_m + mean_s for i in moving]
+    if clustering:
+        dist = Clustering().distance_pc_clusering
+    else:
+        dist = distance_kdTree9D
     original_moving = moving.copy()
     static = set_number_of_points(static, points)
     moving = set_number_of_points(moving, points)
 
-    m = Optimizer(distance_kdTree9D, affine,
+    m = Optimizer(dist, affine,
                   args=(static, moving),
                   method='L-BFGS-B',
                   options=options)
