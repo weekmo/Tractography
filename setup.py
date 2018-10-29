@@ -6,12 +6,13 @@ with open("README.md", "r") as fh:
 
 setup(
     name="tractography",
-    version="0.1.13",
+    version="0.1.14",
     author="Mohammed Abdelgadir",
     description="The package deals with brain bundles images",
     long_description=long_description,
     url="https://weekmo.github.io/Tractography/",
-    package_dir={'src': 'tractography'},
+    package_dir={'': 'src'},
+    packages = ['tractography'],
     classifiers=(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License (GPL)",

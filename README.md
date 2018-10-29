@@ -9,12 +9,20 @@ It includes functions to read/write, visualise and register bundles
 ### "It's always preferred to use source code!"
 ## Installation:
 
-Easy to install by using pip (recommended)
-
+Easy to install by downloading install.sh and run it:
+#### On Linux
+```commandline
+./install.sh
+```
+#### On widows by using bash
+```commandline
+bash install.sh 
+```
+#### By pip
 ```commandline
 pip install tractography
 ```
-or conda
+#### By conda
 
 ```commandline
 conda install -c weekmo tractography
