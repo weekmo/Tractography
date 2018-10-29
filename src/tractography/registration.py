@@ -13,7 +13,7 @@ from dipy.align.streamlinear import StreamlineLinearRegistration, compose_matrix
 from dipy.tracking.streamline import set_number_of_points, transform_streamlines, center_streamlines
 from dipy.core.optimize import Optimizer
 
-from .Utils import pca_transform,distance_kdTree9D,Clustering
+from .Utils import Clustering, distance_kdtree, pca_transform_norm
 from .io import read_ply, write_trk, write_ply
 
 
@@ -40,7 +40,7 @@ def register(static, moving, points=20):
     del cb_subj1
     del cb_subj2
     del static
-    return srm.transform(moving)#, srm.matrix
+    return srm.transform(moving)  # , srm.matrix
 
 
 def register_all(data_path):
@@ -91,29 +91,41 @@ def register_all(data_path):
 
 def registration_icp(static, moving,
                      points=20, pca=True, maxiter=100000,
-                     affine=[0, 0, 0, 0, 0, 0],clustering=True):
+                     affine=[0, 0, 0, 0, 0, 0], clustering=None,
+                     medoids=[0,1,2],k=3,beta=999):
     options = {'maxcor': 10, 'ftol': 1e-7,
                'gtol': 1e-5, 'eps': 1e-8,
                'maxiter': maxiter}
     if pca:
-        moving = pca_transform(static, moving,points)
+        moving = pca_transform_norm(static, moving)
     else:
         mean_m = np.mean(np.concatenate(moving), axis=0)
         mean_s = np.mean(np.concatenate(static), axis=0)
         moving = [i - mean_m + mean_s for i in moving]
-    if clustering:
-        dist = Clustering().distance_pc_clusering
-    else:
-        dist = distance_kdTree9D
+
     original_moving = moving.copy()
     static = set_number_of_points(static, points)
     moving = set_number_of_points(moving, points)
 
+    if clustering=='kmeans':
+        dist = Clustering().distance_pc_clustering_mean
+        args = (static,moving,k,beta)
+        print('kmeans')
+    elif clustering =='kmedoids':
+        dist = Clustering().distance_pc_clustering_medoids
+        args = (static,moving,medoids,beta)
+        print('kmedoids')
+    else:
+        dist = distance_kdtree
+        args = (static,moving,beta)
+        print('Without Clustering')
+
     m = Optimizer(dist, affine,
-                  args=(static, moving),
+                  args=args,
                   method='L-BFGS-B',
                   options=options)
 
     m.print_summary()
     mat = compose_matrix44(m.xopt)
     return transform_streamlines(original_moving, mat)
+

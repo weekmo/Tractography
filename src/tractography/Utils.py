@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+
 from dipy.segment.quickbundles import bundles_distances_mdf
 from dipy.tracking.streamline import transform_streamlines, set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
@@ -9,21 +10,29 @@ from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.decomposition import PCA
 
+from pyclustering.cluster.kmedoids import kmedoids
+
 
 def make9D(bundles):
     cov = [[np.mean(i, axis=0), np.cov(i.T)] for i in bundles]
     return np.array([np.hstack((i, j[0], j[1, 1], j[1, 2], j[2, 2])) for i, j in cov])
 
 
-def distance_euc(x0, static, moving):
-    aff = compose_matrix44(x0)
-    moving = transform_streamlines(moving, aff)
-    dist_mat = bundles_distances_mdf(static, moving)
-    idx = np.argmin(dist_mat, axis=1)
-    static = np.array(static)
-    moving = np.array(moving)[idx]
-    cost = np.sum(np.linalg.norm(static - moving, axis=2))
-    return cost
+def normalize(bundle):
+    # new_bundle = np.array([i - np.min(i,axis=0) for i in bundle])
+    calc_bundle = np.min(np.min(np.concatenate(bundle), axis=0))
+    new_bundle = [i - calc_bundle for i in bundle]
+    calc_bundle = np.max(np.max(np.concatenate(new_bundle), axis=0))
+    new_bundle = [i / calc_bundle for i in new_bundle]
+    # calc_bundle = np.mean(np.concatenate(new_bundle),axis=0)
+    # new_bundle = [i - calc_bundle for i in new_bundle]
+    # return [i / np.max(i,axis=0) for i in new_bundle]
+    return new_bundle
+
+
+def kd_tree_cost(static, moving):
+    tree = KDTree(moving)
+    return np.sum(tree.query(static, k=1)[0])
 
 
 def distance_mdf(x0, static, moving):
@@ -38,61 +47,109 @@ def distance_mdf(x0, static, moving):
 
 
 # It uses point cloud
-def distance_kdtree(x0, static, moving):
+def distance_kdtree(x0, static, moving, beta):
     # joint bundles
     affine = compose_matrix44(x0)
     moving = transform_streamlines(moving, affine)
-    tree = KDTree(np.concatenate(moving))
-    cost = np.sum(tree.query(np.concatenate(static), k=1)[0])
-    return cost
+    return kd_tree_cost(np.concatenate(static), np.concatenate(moving)) * beta
 
 
 # It uses tracts distance
-def distance_kdTree9D(x0, static, moving):
+def distance_kdTree9D(x0, static, moving, beta):
     affine = compose_matrix44(x0)
     moving = transform_streamlines(moving, affine)
 
     new_static = make9D(static)
     new_moving = make9D(moving)
 
-    tree = KDTree(new_moving)
-    cost = np.sum(tree.query(new_static, k=1)[0])
-    return cost
+    return kd_tree_cost(new_static, new_moving) * beta
 
 
 class Clustering:
 
     def __init__(self):
-        self.inint_dist = np.zeros((3,3))
+        self.inint_dist = np.zeros((3, 3))
+        self.clustering = True
 
-    def distance_pc_clusering(self,x0,static,moving,c_num=3,k=20):
+    """
+    Use point cloud
+    """
+
+    def distance_pc_clustering_medoids(self, x0, static, moving, medoids=[0], beta=20):
         affine = compose_matrix44(x0)
         moving = transform_streamlines(moving, affine)
 
         con_static = np.concatenate(static)
         con_moving = np.concatenate(moving)
 
+        # con_static = static
+        # con_moving=moving
+
         tree = KDTree(con_moving)
         cost = np.sum(tree.query(con_static, k=1)[0])
 
-        kmeans = KMeans(c_num).fit(con_moving)
-        cost1 = np.linalg.norm((euclidean_distances(kmeans.cluster_centers_) - euclidean_distances(self.inint_dist))/2)
-        self.inint_dist = kmeans.cluster_centers_
-        # print(self.inint_dist)
-        return cost+k*cost1
+        if self.clustering:
+            self.kmedoids = kmedoids(con_moving, medoids)
+            self.kmedoids.process()
+            self.clustering = False
+
+        clustering_cost = 0
+        for i in range(len(medoids)):
+            mean = np.mean(con_moving[self.kmedoids.get_clusters()[i]], axis=0)
+            clustering_cost += np.linalg.norm(con_moving[self.kmedoids.get_medoids()[i]] -
+                                              con_moving[tree.query([mean], k=1)[1][0]][0])
+        return cost + beta * clustering_cost
+
+    def distance_pc_clustering_mean(self, x0, static, moving, k=3, beta=20):
+        """
+        Clustering once
+        :param x0:
+        :param static:
+        :param moving:
+        :param c_num:
+        :param k:
+        :return:
+        """
+        affine = compose_matrix44(x0)
+        moving = transform_streamlines(moving, affine)
+
+        con_static = np.concatenate(static)
+        con_moving = np.concatenate(moving)
+
+        cost = kd_tree_cost(con_static, con_moving)
+
+        if self.clustering:
+            self.kmeans = KMeans(k).fit(con_moving)
+            self.idx = {i: np.where(self.kmeans.labels_ == i)[0] for i in range(k)}
+            self.clustering = False
+
+        clustering_cost = 0
+        for i in range(k):
+            clustering_cost += np.linalg.norm(
+                self.kmeans.cluster_centers_[i] - np.mean(con_moving[self.idx[i]], axis=0))
+        return cost + beta * clustering_cost
 
 
-def pca_transform(static, moving, points=20):
-    con_target = np.concatenate(static)
-    con_subject = np.concatenate(moving)
+def pca_transform_norm(static, moving):
+    con_static = np.concatenate(static)
+    con_moving = np.concatenate(moving)
 
-    mean_s = np.mean(con_subject, axis=0)
-    mean_t = np.mean(con_target, axis=0)
+    mean_static = np.mean(con_static, axis=0)
+    mean_moving = np.mean(con_moving, axis=0)
+
+    norm_static = normalize(static)
+    norm_moving = normalize(moving)
+
+    con_norm_static = np.concatenate(norm_static)
+    con_norm_moving = np.concatenate(norm_moving)
+
+    norm_static_mean = np.mean(con_norm_static, axis=0)
+    norm_moving_mean = np.mean(con_norm_moving, axis=0)
 
     pca = PCA(n_components=3)
-    pca = pca.fit(con_subject)
+    pca = pca.fit(con_moving)
     prev = pca.components_.T
-    pca = pca.fit(con_target)
+    pca = pca.fit(con_static)
 
     aff = np.dot(prev, pca.components_)
 
@@ -101,21 +158,22 @@ def pca_transform(static, moving, points=20):
     for i in idx:
         aff2 = np.copy(aff)
         aff2[:, i] *= -1
-        new_moving = [np.dot((i - mean_s), aff2) + mean_t for i in moving]
-        cost = distance_kdTree9D([0, 0, 0], new_moving, static)
+        new_moving = [np.dot((j - norm_moving_mean), aff2) + norm_static_mean for j in norm_moving]
+        cost = kd_tree_cost(con_norm_static, np.concatenate(new_moving))
         # print(cost)
         if cost < min:
-            new_move = new_moving
+            new_aff = aff2
             min = cost
+    new_move = [np.dot((j - mean_moving), new_aff) + mean_static for j in moving]
     # print(min)
     del new_moving
     del min
     del pca
     del prev
-    del mean_s
-    del mean_t
-    del con_target
-    del con_subject
+    del mean_moving
+    del mean_static
+    del con_static
+    del con_moving
     del aff
     del aff2
     return new_move

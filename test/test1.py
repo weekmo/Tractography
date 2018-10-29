@@ -1,19 +1,20 @@
+import time
+import sys
+import random
 import numpy as np
 from sklearn.neighbors import KDTree
 from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from src.tractography.io import read_ply
+from src.tractography.viz import draw_brain
+from src.tractography.Utils import Clustering, pca_transform_norm
+from src.tractography.registration import registration_icp
+from scipy.optimize import minimize
 
-init_dist = np.zeros((3,3))
-mat = np.array([[1,4,7],[2,5,8],[3,6,9]])
-mat1 = np.array([[3,0,0],[6,0,0],[0,0,0]])
-mat2 = np.array([[0,6,0],[0,8,0],[0,0,0]])
+static = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+moving = read_ply('../data/150019/m_ex_atr-right_shore.ply')
 
+new_moving = pca_transform_norm(static, moving)
 
-#cost = np.sqrt(np.sum((mat2-mat)**2))
-dist1 = euclidean_distances(mat1)
-dist2 = euclidean_distances(mat2)
-dist = np.linalg.norm((dist1 - dist2)/2)
-print(np.sqrt(np.sum((dist2-dist1)**2)/2))
-print((dist2-dist1)**2)
-print(np.sqrt(14))
-print(dist1)
-print(dist2)
+draw_brain([static, moving, new_moving], [[1, 0, 0], [0, 0, 1], [0, 1, 0]])
