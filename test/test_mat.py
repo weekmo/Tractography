@@ -7,7 +7,7 @@ from src.tractography.io import read_ply
 from src.tractography.Utils import distance_kdTree9D, make9D, Clustering, distance_kdtree, \
     pca_transform_norm, normalize
 from src.tractography.viz import draw_brain
-from src.tractography.registration import registration_icp, register
+from src.tractography.registration import registration_icp
 from sklearn.neighbors import KDTree
 from dipy.tracking.streamline import set_number_of_points, transform_streamlines
 from dipy.align.streamlinear import compose_matrix44
@@ -16,10 +16,8 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
 
-# TODO Use k Medoids.
-# TODO Use threshold in the distance function.
 # TODO Use fiber base distance. for (distance only).
-# TODO Use tract base min(p -> p, p-> rev p) and select the closest one
+# TODO Use tract base min(p -> p, p -> rev p) and select the closest one
 """
 size 03, translation.
 size 06, translation + rotation.

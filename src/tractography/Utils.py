@@ -75,7 +75,7 @@ class Clustering:
     Use point cloud
     """
 
-    def distance_pc_clustering_medoids(self, x0, static, moving, medoids=[0], beta=20, max_dist=50):
+    def distance_pc_clustering_medoids(self, x0, static, moving, medoids, beta, max_dist):
         affine = compose_matrix44(x0)
         moving = transform_streamlines(moving, affine)
 
@@ -84,7 +84,7 @@ class Clustering:
 
         # con_static = static
         # con_moving=moving
-        
+
         tree = KDTree(con_moving)
         dist_list = np.hstack(tree.query(con_static, k=1)[0])
         cost = np.sum(dist_list[np.where(dist_list < max_dist)])
@@ -101,7 +101,7 @@ class Clustering:
                                               con_moving[tree.query([mean], k=1)[1][0]][0])
         return cost + beta * clustering_cost
 
-    def distance_pc_clustering_mean(self, x0, static, moving, k=3, beta=999, max_dist=50):
+    def distance_pc_clustering_mean(self, x0, static, moving, k, beta, max_dist):
         """
         Clustering once
         :param x0:
@@ -160,7 +160,7 @@ def pca_transform_norm(static, moving, max_dist):
         aff2 = np.copy(aff)
         aff2[:, i] *= -1
         new_moving = [np.dot((j - norm_moving_mean), aff2) + norm_static_mean for j in norm_moving]
-        cost = kd_tree_cost(con_norm_static, np.concatenate(new_moving),max_dist)
+        cost = kd_tree_cost(con_norm_static, np.concatenate(new_moving), max_dist)
         # print(cost)
         if cost < min:
             new_aff = aff2

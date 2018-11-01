@@ -1,3 +1,4 @@
+import numpy as np
 from open3d import (LineSet, Vector3dVector, Vector2iVector, draw_geometries,
                     draw_geometries_with_animation_callback)
 from random import random
@@ -27,3 +28,28 @@ def draw_brain(bundles_list, colour_list=[], rotate=False):
         draw_geometries_with_animation_callback(bundles, __rotate_view)
     else:
         draw_geometries(bundles)
+
+def draw_bundles(bundles_list, colour_list=[], rotate=False):
+    draw_brain(bundles_list, colour_list, rotate)
+
+def clusters_colors(bundle, colours, labels):
+    clustered_bundle = []
+    counter = 0
+    for points in bundle:
+        lines = []
+        colours_list=[]
+        for i,point in enumerate(points):
+            if i < (len(points) - 1):
+                lines.append([i, i + 1])
+                colours_list.append(colours[labels[counter]])
+            counter+=1
+            #print(idx[counter])
+        data_line = LineSet()
+        data_line.points = Vector3dVector(points)
+        data_line.lines = Vector2iVector(lines)
+        data_line.colors = Vector3dVector(colours_list)
+        clustered_bundle.append(data_line)
+    return clustered_bundle
+
+def draw_clusters(clusters):
+    draw_geometries(np.hstack(clusters))

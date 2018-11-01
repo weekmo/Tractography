@@ -92,12 +92,12 @@ def register_all(data_path):
 def registration_icp(static, moving,
                      points=20, pca=True, maxiter=100000,
                      affine=[0, 0, 0, 0, 0, 0], clustering=None,
-                     medoids=[0,1,2],k=3,beta=999, max_dist=50):
+                     medoids=[0, 1, 2], k=3, beta=999, max_dist=50):
     options = {'maxcor': 10, 'ftol': 1e-7,
                'gtol': 1e-5, 'eps': 1e-8,
                'maxiter': maxiter}
     if pca:
-        moving = pca_transform_norm(static, moving,max_dist)
+        moving = pca_transform_norm(static, moving, max_dist)
     else:
         mean_m = np.mean(np.concatenate(moving), axis=0)
         mean_s = np.mean(np.concatenate(static), axis=0)
@@ -107,17 +107,17 @@ def registration_icp(static, moving,
     static = set_number_of_points(static, points)
     moving = set_number_of_points(moving, points)
 
-    if clustering=='kmeans':
+    if clustering == 'kmeans':
         dist = Clustering().distance_pc_clustering_mean
-        args = (static,moving,k,beta,max_dist)
+        args = (static, moving, k, beta, max_dist)
         print('kmeans')
-    elif clustering =='kmedoids':
+    elif clustering == 'kmedoids':
         dist = Clustering().distance_pc_clustering_medoids
-        args = (static,moving,medoids,beta, max_dist)
+        args = (static, moving, medoids, beta, max_dist)
         print('kmedoids')
     else:
         dist = distance_kdtree
-        args = (static,moving,beta)
+        args = (static, moving, beta, max_dist)
         print('Without Clustering')
 
     m = Optimizer(dist, affine,
@@ -128,4 +128,3 @@ def registration_icp(static, moving,
     m.print_summary()
     mat = compose_matrix44(m.xopt)
     return transform_streamlines(original_moving, mat)
-
