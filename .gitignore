@@ -6,3 +6,5 @@ dist/
 registration.iml
 data/
 __pycache__/
+*.png
+.spyproject/
