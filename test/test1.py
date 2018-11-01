@@ -8,7 +8,7 @@ from sklearn.neighbors import KDTree
 from sklearn.cluster import KMeans
 # from sklearn.decomposition import PCA
 from src.tractography.io import read_ply
-from src.tractography.viz import draw_brain
+from src.tractography.viz import draw_bundles
 from src.tractography.Utils import kd_tree_cost, pca_transform_norm
 from src.tractography.registration import registration_icp
 from open3d import draw_geometries
@@ -50,4 +50,4 @@ plt.xlabel("Distance")
 plt.savefig('dist_after_PCA2.png', dpi=600)
 #plt.show()
 """
-#draw_brain([static, moving, new_moving], [[1, 0, 0], [0, 0, 1], [0, 1, 0]], rotate=True)
+#draw_bundles([static, moving, new_moving], [[1, 0, 0], [0, 0, 1], [0, 1, 0]], rotate=True)

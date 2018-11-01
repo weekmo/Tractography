@@ -34,7 +34,7 @@ conda install -c weekmo tractography
 
 from tractography.io import read_ply,write_trk
 from tractography.registration import register
-from tractography.viz import draw_brain
+from tractography.viz import draw_bundles
 
 # Read bundles
 data1 = read_ply('target.ply')
@@ -47,14 +47,14 @@ aligned_bundle,mat = register(target=data1, subject=data2)
 write_trk("aligned_bundle.trk", aligned_bundle)
 
 # Export images before and after registration
-draw_brain([data1,data2])
-draw_brain([data1,aligned_bundle])
+draw_bundles([data1,data2])
+draw_bundles([data1,aligned_bundle])
 ```
 
 ## Example 2:
 #### Show all bundles in a folder
 ```python
-from tractography.viz import draw_brain
+from tractography.viz import draw_bundles
 from os import listdir
 from os.path import isfile
 from tractography.io import read_ply
@@ -70,6 +70,6 @@ files = [data_path + f for f in listdir(data_path) if isfile(data_path + f) and 
 brain = []
 for name in files:
     brain.append(read_ply(name))
-draw_brain(brain)
+draw_bundles(brain)
 ```
 Enjoy

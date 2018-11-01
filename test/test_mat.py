@@ -6,7 +6,7 @@ import numpy as np
 from src.tractography.io import read_ply
 from src.tractography.Utils import distance_kdTree9D, make9D, Clustering, distance_kdtree, \
     pca_transform_norm, normalize
-from src.tractography.viz import draw_brain
+from src.tractography.viz import draw_bundles
 from src.tractography.registration import registration_icp
 from sklearn.neighbors import KDTree
 from dipy.tracking.streamline import set_number_of_points, transform_streamlines
@@ -38,4 +38,4 @@ start = time.time()
 no_cluster = registration_icp(static, moving)
 print("Time for No Clustering", time.time() - start)
 
-draw_brain([static, moving, medoids, mean, no_cluster], [[1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 1, 0], [0, 0, 1]])
+draw_bundles([static, moving, medoids, mean, no_cluster], [[1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 1, 0], [0, 0, 1]])

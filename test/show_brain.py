@@ -1,4 +1,4 @@
-from src.tractography.viz import draw_brain
+from src.tractography.viz import draw_bundles
 from os import listdir  # , mkdir
 from os.path import isfile  # , isdir
 from src.tractography.io import read_ply
@@ -18,10 +18,10 @@ mat = compose_matrix44([0,0,0,0,90,90])
 brain = []
 for name in files:
    brain.append(transform_streamlines(read_ply(name),mat))
-draw_brain(brain,rotate=True)
+draw_bundles(brain,rotate=True)
 
 """
 data1 = read_ply('../data/132118/m_ex_atr-left_shore.ply')
 data2 = read_ply('../data/132118/m_ex_atr-right_shore.ply')
-draw_brain([data1,data2])
+draw_bundles([data1,data2])
 """

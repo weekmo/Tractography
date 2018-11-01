@@ -10,7 +10,7 @@ def __rotate_view(vis):
     return False
 
 
-def draw_brain(bundles_list, colour_list=[], rotate=False):
+def draw_bundles(bundles_list, colour_list=[], rotate=False):
     bundles = []
     for idx, bundle in enumerate(bundles_list):
         if len(colour_list) < 1:
@@ -28,9 +28,6 @@ def draw_brain(bundles_list, colour_list=[], rotate=False):
         draw_geometries_with_animation_callback(bundles, __rotate_view)
     else:
         draw_geometries(bundles)
-
-def draw_bundles(bundles_list, colour_list=[], rotate=False):
-    draw_brain(bundles_list, colour_list, rotate)
 
 def clusters_colors(bundle, colours, labels):
     clustered_bundle = []
