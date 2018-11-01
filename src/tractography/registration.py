@@ -10,7 +10,7 @@ from os import listdir, mkdir
 from os.path import isfile, isdir
 
 from dipy.align.streamlinear import StreamlineLinearRegistration, compose_matrix44
-from dipy.tracking.streamline import set_number_of_points, transform_streamlines, center_streamlines
+from dipy.tracking.streamline import set_number_of_points, transform_streamlines
 from dipy.core.optimize import Optimizer
 
 from .Utils import Clustering, distance_kdtree, pca_transform_norm
@@ -92,12 +92,12 @@ def register_all(data_path):
 def registration_icp(static, moving,
                      points=20, pca=True, maxiter=100000,
                      affine=[0, 0, 0, 0, 0, 0], clustering=None,
-                     medoids=[0,1,2],k=3,beta=999):
+                     medoids=[0,1,2],k=3,beta=999, max_dist=50):
     options = {'maxcor': 10, 'ftol': 1e-7,
                'gtol': 1e-5, 'eps': 1e-8,
                'maxiter': maxiter}
     if pca:
-        moving = pca_transform_norm(static, moving)
+        moving = pca_transform_norm(static, moving,max_dist)
     else:
         mean_m = np.mean(np.concatenate(moving), axis=0)
         mean_s = np.mean(np.concatenate(static), axis=0)
@@ -109,11 +109,11 @@ def registration_icp(static, moving,
 
     if clustering=='kmeans':
         dist = Clustering().distance_pc_clustering_mean
-        args = (static,moving,k,beta)
+        args = (static,moving,k,beta,max_dist)
         print('kmeans')
     elif clustering =='kmedoids':
         dist = Clustering().distance_pc_clustering_medoids
-        args = (static,moving,medoids,beta)
+        args = (static,moving,medoids,beta, max_dist)
         print('kmedoids')
     else:
         dist = distance_kdtree
