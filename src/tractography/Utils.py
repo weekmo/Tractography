@@ -18,14 +18,10 @@ def make9D(bundles):
 
 
 def normalize(bundle):
-    # new_bundle = np.array([i - np.min(i,axis=0) for i in bundle])
     calc_bundle = np.min(np.concatenate(bundle))
     new_bundle = [i - calc_bundle for i in bundle]
     calc_bundle = np.max(np.concatenate(new_bundle))
     new_bundle = [i / calc_bundle for i in new_bundle]
-    # calc_bundle = np.mean(np.concatenate(new_bundle),axis=0)
-    # new_bundle = [i - calc_bundle for i in new_bundle]
-    # return [i / np.max(i,axis=0) for i in new_bundle]
     return new_bundle
 
 
@@ -41,9 +37,35 @@ def distance_mdf(x0, static, moving):
     moving = transform_streamlines(moving, aff)
     dist_mat = bundles_distances_mdf(static, moving)
     # idx = np.argmin(dist_mat, axis=1)
-    vals = np.min(dist_mat, axis=1)
-    cost = np.sum(vals)
+    cost = np.sum(np.min(dist_mat, axis=1))
     return cost
+
+
+def distance_tract(x0,static,moving,min_dist):
+    """
+    MDF implementation usning SUM (not mean)
+    """
+    aff = compose_matrix44(x0)
+    moving = transform_streamlines(moving, aff)
+    #idx =[]
+    total_cost = 0
+    for i in static:
+        min_cost=sys.maxsize
+        #index = -1
+        #for k,j in enumerate(moving_points):
+        for j in moving:
+            cost1 = np.linalg.norm(i - j,axis=1)
+            cost1 = np.sum(cost1[np.where(cost1<min_dist)])
+            
+            cost2 = np.linalg.norm(i - j[::-1],axis=1)
+            cost2 = np.sum(cost2[np.where(cost2<min_dist)])
+            
+            cost = np.min([cost1,cost2])
+            if cost<min_cost:
+                min_cost = cost
+                #index = k
+        total_cost+=min_cost
+    return total_cost
 
 
 # It uses point cloud
