@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 from dipy.segment.quickbundles import bundles_distances_mdf
-from dipy.tracking.streamline import transform_streamlines
+from dipy.tracking.streamline import transform_streamlines,set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
 
 from sklearn.neighbors import KDTree
@@ -12,31 +12,36 @@ from sklearn.decomposition import PCA
 from pyclustering.cluster.kmedoids import kmedoids
 
 
-def make9D(bundles):
-    cov = [[np.mean(i, axis=0), np.cov(i.T)] for i in bundles]
+def make9D(bundle):
+    """
+    Helping function uses 9D tract
+    """
+    cov = [[np.mean(i, axis=0), np.cov(i.T)] for i in bundle]
     return np.array([np.hstack((i, j[0], j[1, 1], j[1, 2], j[2, 2])) for i, j in cov])
 
 
 def normalize(bundle):
-    # new_bundle = np.array([i - np.min(i,axis=0) for i in bundle])
+    """
+    Helping function uses Points Cloud
+    """
     calc_bundle = np.min(np.concatenate(bundle))
     new_bundle = [i - calc_bundle for i in bundle]
     calc_bundle = np.max(np.concatenate(new_bundle))
     new_bundle = [i / calc_bundle for i in new_bundle]
-    # calc_bundle = np.mean(np.concatenate(new_bundle),axis=0)
-    # new_bundle = [i - calc_bundle for i in new_bundle]
-    # return [i / np.max(i,axis=0) for i in new_bundle]
     return new_bundle
 
 
 def kd_tree_cost(static, moving, max_dist):
+    """
+    Helping function uses Points Cloud
+    """
     tree = KDTree(moving)
     dist_list = np.hstack(tree.query(static, k=1)[0])
     return np.sum(dist_list[np.where(dist_list < max_dist)])
 
 
 def distance_mdf(x0, static, moving):
-    # Minimum Direct Flip (MDF) distance
+    # Minimum Direct Flip (MDF) distance [Tract]
     aff = compose_matrix44(x0)
     moving = transform_streamlines(moving, aff)
     dist_mat = bundles_distances_mdf(static, moving)
@@ -45,17 +50,41 @@ def distance_mdf(x0, static, moving):
     cost = np.sum(vals)
     return cost
 
+def dist_tract(static, moving, points, min_dist):
+    # Implementation of MDF using summation [tract]
+    static_points = set_number_of_points(static, points)
+    moving_points = set_number_of_points(moving, points)
+    # idx =[]
+    total_cost = 0
+    for i in static_points:
+        min_cost = sys.maxsize
+        # index = -1
+        # for k,j in enumerate(moving_points):
+        for j in moving_points:
+            cost1 = np.linalg.norm(i - j, axis=1)
+            cost1 = np.sum(cost1[np.where(cost1 < min_dist)])
 
-# It uses point cloud
+            cost2 = np.linalg.norm(i - j[::-1], axis=1)
+            cost2 = np.sum(cost2[np.where(cost2 < min_dist)])
+
+            cost = np.min([cost1, cost2])
+            if cost < min_cost:
+                min_cost = cost
+                # index = k
+        total_cost += min_cost
+        # idx.append(index)
+
+
 def distance_kdtree(x0, static, moving, beta, max_dist):
-    # joint bundles
+    # It uses points cloud and KD Tree
     affine = compose_matrix44(x0)
     moving = transform_streamlines(moving, affine)
     return kd_tree_cost(np.concatenate(static), np.concatenate(moving), max_dist) * beta
 
 
-# It uses tracts distance
+
 def distance_kdTree9D(x0, static, moving, beta, max_dist):
+    # It uses 9D tracts distance
     affine = compose_matrix44(x0)
     moving = transform_streamlines(moving, affine)
 
@@ -72,7 +101,7 @@ class Clustering:
         self.clustering = True
 
     """
-    Use point cloud
+    Using points cloud
     """
 
     def distance_pc_clustering_medoids(self, x0, static, moving, medoids, beta, max_dist):
@@ -99,6 +128,7 @@ class Clustering:
             mean = np.mean(con_moving[self.kmedoids.get_clusters()[i]], axis=0)
             clustering_cost += np.linalg.norm(con_moving[self.kmedoids.get_medoids()[i]] -
                                               con_moving[tree.query([mean], k=1)[1][0]][0])
+        print(clustering_cost)
         return cost + beta * clustering_cost
 
     def distance_pc_clustering_mean(self, x0, static, moving, k, beta, max_dist):
@@ -155,20 +185,20 @@ def pca_transform_norm(static, moving, max_dist):
     aff = np.dot(prev, pca.components_)
 
     idx = [[], [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]]
-    min = sys.maxsize
+    min_cost = sys.maxsize
     for i in idx:
         aff2 = np.copy(aff)
         aff2[:, i] *= -1
         new_moving = [np.dot((j - norm_moving_mean), aff2) + norm_static_mean for j in norm_moving]
         cost = kd_tree_cost(con_norm_static, np.concatenate(new_moving), max_dist)
         # print(cost)
-        if cost < min:
+        if cost < min_cost:
             new_aff = aff2
-            min = cost
+            min_cost = cost
     new_move = [np.dot((j - mean_moving), new_aff) + mean_static for j in moving]
     # print(min)
     del new_moving
-    del min
+    del min_cost
     del pca
     del prev
     del mean_moving

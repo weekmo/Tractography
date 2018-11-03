@@ -16,8 +16,12 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
 
-# TODO Use fiber base distance. for (distance only).
-# TODO Use tract base min(p -> p, p -> rev p) and select the closest one
+# ToDo: Pictures for registration:
+"""
+    1- With kmeans clustering and without
+    2- With PCA and without
+    3- Use different distance functions (MDF, 9D, Points Cloud)
+"""
 """
 size 03, translation.
 size 06, translation + rotation.
@@ -28,10 +32,10 @@ size 12, translation + rotation + scaling + shearing.
 static = read_ply('data/132118/m_ex_atr-left_shore.ply')
 moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
 start = time.time()
-medoids = registration_icp(static, moving, clustering='kmedoids')
+medoids = registration_icp(static, moving,pca=False)
 print("Time for kmedoids", time.time() - start)
 start = time.time()
-mean = registration_icp(static, moving, clustering='kmeans')
+mean = registration_icp(static, moving)
 print("Time for kmeans", time.time() - start)
 
 start = time.time()
@@ -39,3 +43,4 @@ no_cluster = registration_icp(static, moving)
 print("Time for No Clustering", time.time() - start)
 
 draw_bundles([static, moving, medoids, mean, no_cluster], [[1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 1, 0], [0, 0, 1]])
+draw_bundles([static,mean],[[1,0,0],[0,0,1]])

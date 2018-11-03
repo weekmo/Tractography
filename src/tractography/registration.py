@@ -6,8 +6,8 @@ Created on 24 Jul 2018
 '''
 import time
 import numpy as np
-from os import listdir, mkdir
-from os.path import isfile, isdir
+from os import listdir#, mkdir
+from os.path import isfile#, isdir
 
 from dipy.align.streamlinear import StreamlineLinearRegistration, compose_matrix44
 from dipy.tracking.streamline import set_number_of_points, transform_streamlines
