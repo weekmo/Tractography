@@ -92,7 +92,7 @@ def register_all(data_path):
 def registration_icp(static, moving,
                      points=20, pca=True, maxiter=100000,
                      affine=[0, 0, 0, 0, 0, 0], clustering=None,
-                     medoids=[0, 1, 2], k=3, beta=999, max_dist=50):
+                     medoids=[0, 1, 2], k=3, beta=999, max_dist=40):
     options = {'maxcor': 10, 'ftol': 1e-7,
                'gtol': 1e-5, 'eps': 1e-8,
                'maxiter': maxiter}
