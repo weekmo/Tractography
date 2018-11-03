@@ -7,13 +7,11 @@ from pyclustering.cluster.kmedoids import kmedoids
 
 static = read_ply('data/132118/m_ex_atr-left_shore.ply')
 
-<<<<<<< HEAD
 # km = kmedoids(np.concatenate(static),[0,1,2])
 km = kmedoids(static, [0, 1, 2])
 km.process()
 # print(km.get_clusters())
-=======
+
 km = kmedoids(np.concatenate(static),[0,1,2])
 km = kmedoids(static[0],[0,1,2])
 km.process()
->>>>>>> ff298d76de8ce02505da5c98372f452dcc75688c

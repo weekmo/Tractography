@@ -16,12 +16,7 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
 
-# ToDo: Pictures for registration:
-"""
-    1- With kmeans clustering and without
-    2- With PCA and without
-    3- Use different distance functions (MDF, 9D, Points Cloud)
-"""
+# ToDo: Use different distance functions with and without clustering
 """
 size 03, translation.
 size 06, translation + rotation.
