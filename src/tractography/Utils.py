@@ -6,10 +6,7 @@ from dipy.tracking.streamline import transform_streamlines,set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
 
 from sklearn.neighbors import KDTree
-from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-
-from pyclustering.cluster.kmedoids import kmedoids
 
 
 def make9D(bundle):
@@ -39,18 +36,14 @@ def kd_tree_cost(static, moving, max_dist):
     dist_list = np.hstack(tree.query(static, k=1)[0])
     return np.sum(dist_list[np.where(dist_list < max_dist)])
 
-
-def distance_mdf(x0, static, moving):
-    # Minimum Direct Flip (MDF) distance [Tract]
-    aff = compose_matrix44(x0)
-    moving = transform_streamlines(moving, aff)
+def mdf_cost(static, moving):
     dist_mat = bundles_distances_mdf(static, moving)
     # idx = np.argmin(dist_mat, axis=1)
     vals = np.min(dist_mat, axis=1)
     cost = np.sum(vals)
     return cost
 
-def dist_tract(static, moving, points, min_dist):
+def tract_cost(static, moving, points, max_dist):
     # Implementation of MDF using summation [tract]
     static_points = set_number_of_points(static, points)
     moving_points = set_number_of_points(moving, points)
@@ -62,10 +55,10 @@ def dist_tract(static, moving, points, min_dist):
         # for k,j in enumerate(moving_points):
         for j in moving_points:
             cost1 = np.linalg.norm(i - j, axis=1)
-            cost1 = np.sum(cost1[np.where(cost1 < min_dist)])
+            cost1 = np.sum(cost1[np.where(cost1 < max_dist)])
 
             cost2 = np.linalg.norm(i - j[::-1], axis=1)
-            cost2 = np.sum(cost2[np.where(cost2 < min_dist)])
+            cost2 = np.sum(cost2[np.where(cost2 < max_dist)])
 
             cost = np.min([cost1, cost2])
             if cost < min_cost:
@@ -73,16 +66,28 @@ def dist_tract(static, moving, points, min_dist):
                 # index = k
         total_cost += min_cost
         # idx.append(index)
+    return total_cost
 
-def distance_kdtree(x0, static, moving, beta, max_dist):
+def distance_mdf(x0, static, moving):
+    # Minimum Direct Flip (MDF) distance [Tract]
+    aff = compose_matrix44(x0)
+    moving = transform_streamlines(moving, aff)
+    return mdf_cost(static, moving)
+
+def distance_tract(x0,static, moving, points, max_dist):
+    # Implementation of MDF using summation [tract]
+    aff = compose_matrix44(x0)
+    moving = transform_streamlines(moving, aff)
+    return tract_cost(static, moving, points, max_dist)
+
+def distance_pc(x0, static, moving, beta, max_dist):
     # It uses points cloud and KD Tree
     affine = compose_matrix44(x0)
     moving = transform_streamlines(moving, affine)
     return kd_tree_cost(np.concatenate(static), np.concatenate(moving), max_dist) * beta
 
 
-
-def distance_kdTree9D(x0, static, moving, beta, max_dist):
+def distance_9D(x0, static, moving, beta, max_dist):
     # It uses 9D tracts distance
     affine = compose_matrix44(x0)
     moving = transform_streamlines(moving, affine)
@@ -92,75 +97,85 @@ def distance_kdTree9D(x0, static, moving, beta, max_dist):
 
     return kd_tree_cost(new_static, new_moving, max_dist) * beta
 
+def distance_pc_clustering_mean(x0, static, moving,kmeans,idx, beta, max_dist):
+    affine = compose_matrix44(x0)
+    moving = transform_streamlines(moving, affine)
+    
+    con_static = np.concatenate(static)
+    con_moving = np.concatenate(moving) 
+    
+    cost = kd_tree_cost(con_static, con_moving, max_dist)
+    k = len(kmeans.cluster_centers_)
+    
+    clustering_cost = 0
+    for i in range(k):
+        clustering_cost += np.linalg.norm(
+            kmeans.cluster_centers_[i] - np.mean(con_moving[idx[i]], axis=0))
+    return cost + beta * clustering_cost
 
-class Clustering:
+def distance_pc_clustering_medoids(x0, static, moving, k_medoids, beta, max_dist):
+    affine = compose_matrix44(x0)
+    moving = transform_streamlines(moving, affine)
 
-    def __init__(self):
-        self.inint_dist = np.zeros((3, 3))
-        self.clustering = True
+    con_static = np.concatenate(static)
+    con_moving = np.concatenate(moving)
 
-    """
-    Using points cloud
-    """
+    # con_static = static
+    # con_moving=moving
 
-    def distance_pc_clustering_medoids(self, x0, static, moving, medoids, beta, max_dist):
-        affine = compose_matrix44(x0)
-        moving = transform_streamlines(moving, affine)
+    tree = KDTree(con_moving)
+    dist_list = np.hstack(tree.query(con_static, k=1)[0])
+    cost = np.sum(dist_list[np.where(dist_list < max_dist)])
+    
+    k = len(k_medoids.get_medoids())
+    clustering_cost = 0
+    for i in range(k):
+        mean = np.mean(con_moving[k_medoids.get_clusters()[i]], axis=0)
+        clustering_cost += np.linalg.norm(con_moving[k_medoids.get_medoids()[i]] -
+                                          con_moving[tree.query([mean], k=1)[1][0]][0])
+    #print(clustering_cost)
+    return cost + beta * clustering_cost
+    
+def distance_tract_clustering_mean(x0, static, moving,kmeans,idx, beta, max_dist):
+    affine = compose_matrix44(x0)
+    moving = transform_streamlines(moving, affine)
+    
+    #con_static = np.concatenate(static)
+    con_moving = np.concatenate(moving) 
+    
+    cost = mdf_cost(static, moving)
+    k = len(kmeans.cluster_centers_)
+    
+    clustering_cost = 0
+    for i in range(k):
+        clustering_cost += np.linalg.norm(
+            kmeans.cluster_centers_[i] - np.mean(con_moving[idx[i]], axis=0))
+    return cost + beta * clustering_cost
 
-        con_static = np.concatenate(static)
-        con_moving = np.concatenate(moving)
+def distance_tract_clustering_medoids(x0, static, moving, k_medoids, beta, max_dist):
+    affine = compose_matrix44(x0)
+    moving = transform_streamlines(moving, affine)
 
-        # con_static = static
-        # con_moving=moving
+    #con_static = np.concatenate(static)
+    con_moving = np.concatenate(moving)
 
-        tree = KDTree(con_moving)
-        dist_list = np.hstack(tree.query(con_static, k=1)[0])
-        cost = np.sum(dist_list[np.where(dist_list < max_dist)])
+    # con_static = static
+    # con_moving=moving
 
-        if self.clustering:
-            self.kmedoids = kmedoids(con_moving, medoids)
-            self.kmedoids.process()
-            self.clustering = False
-
-        clustering_cost = 0
-        for i in range(len(medoids)):
-            mean = np.mean(con_moving[self.kmedoids.get_clusters()[i]], axis=0)
-            clustering_cost += np.linalg.norm(con_moving[self.kmedoids.get_medoids()[i]] -
-                                              con_moving[tree.query([mean], k=1)[1][0]][0])
-        print(clustering_cost)
-        return cost + beta * clustering_cost
-
-    def distance_pc_clustering_mean(self, x0, static, moving, k, beta, max_dist):
-        """
-        Clustering once
-        :param x0:
-        :param static:
-        :param moving:
-        :param c_num:
-        :param k:
-        :return:
-        """
-        affine = compose_matrix44(x0)
-        moving = transform_streamlines(moving, affine)
-
-        con_static = np.concatenate(static)
-        con_moving = np.concatenate(moving)
-
-        cost = kd_tree_cost(con_static, con_moving, max_dist)
-
-        if self.clustering:
-            self.kmeans = KMeans(k).fit(con_moving)
-            self.idx = {i: np.where(self.kmeans.labels_ == i)[0] for i in range(k)}
-            self.clustering = False
-
-        clustering_cost = 0
-        for i in range(k):
-            clustering_cost += np.linalg.norm(
-                self.kmeans.cluster_centers_[i] - np.mean(con_moving[self.idx[i]], axis=0))
-        return cost + beta * clustering_cost
-
-
+    tree = KDTree(con_moving)
+    cost = mdf_cost(static, moving)
+    
+    k = len(k_medoids.get_medoids())
+    clustering_cost = 0
+    for i in range(k):
+        mean = np.mean(con_moving[k_medoids.get_clusters()[i]], axis=0)
+        clustering_cost += np.linalg.norm(con_moving[k_medoids.get_medoids()[i]] -
+                                          con_moving[tree.query([mean], k=1)[1][0]][0])
+    #print(clustering_cost)
+    return cost + beta * clustering_cost
+    
 def pca_transform_norm(static, moving, max_dist):
+    
     con_static = np.concatenate(static)
     con_moving = np.concatenate(moving)
 

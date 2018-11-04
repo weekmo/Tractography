@@ -18,24 +18,21 @@ from sklearn.metrics.pairwise import euclidean_distances
 
 # ToDo: Use different distance functions with and without clustering
 """
+The word anisotropy comes the Greek words anisos (unequal) + tropos (turn).
+An entity such as a wavelet is anisotropic, provided it has a different magnitude or properties when measured in different directions.
+In science, an anisotropic entity has properties that differ according to the direction of measurement.
+
 size 03, translation.
 size 06, translation + rotation.
 size 07, translation + rotation + isotropic scaling.
 size 09, translation + rotation + anisotropic scaling.
 size 12, translation + rotation + scaling + shearing.
 """
-static = read_ply('data/132118/m_ex_atr-left_shore.ply')
-moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
-start = time.time()
-medoids = registration_icp(static, moving,pca=False)
-print("Time for kmedoids", time.time() - start)
-start = time.time()
-mean = registration_icp(static, moving)
-print("Time for kmeans", time.time() - start)
+static = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+moving = read_ply('../data/150019/m_ex_atr-right_shore.ply')
 
-start = time.time()
-no_cluster = registration_icp(static, moving)
-print("Time for No Clustering", time.time() - start)
+moving1 = registration_icp(static, moving, clustering='kmedoids',dist='tract',pca=False)
+moving2 = registration_icp(static, moving, clustering='kmeans',dist='tract',pca=False)
+moving3 = registration_icp(static, moving, dist='tract',pca=False)
 
-draw_bundles([static, moving, medoids, mean, no_cluster], [[1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 1, 0], [0, 0, 1]])
-draw_bundles([static,mean],[[1,0,0],[0,0,1]])
+draw_bundles([static,moving3],[[1,0,0],[0,0,1]])

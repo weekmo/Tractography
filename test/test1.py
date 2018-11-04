@@ -29,18 +29,34 @@ def select_threshold(static, moving):
     con_static = np.concatenate(static)
     con_moving = np.concatenate(moving)
     con_pca_moving = np.concatenate(pca_moving)
+    
+    mean_m = np.mean(np.concatenate(moving), axis=0)
+    mean_s = np.mean(np.concatenate(static), axis=0)
+    moving_center = [i - mean_m + mean_s for i in moving]
+    moving_center = np.concatenate(moving_center)
+    
+    tree = KDTree(moving_center)
+    dist_before_PCA_centerd = np.hstack(tree.query(con_static, k=1)[0])
 
     tree = KDTree(con_moving)
     dist_before_PCA = np.hstack(tree.query(con_static, k=1)[0])
 
     tree = KDTree(con_pca_moving)
     dist_after_PCA = np.hstack(tree.query(con_static, k=1)[0])
-
+    
+    plt.hist(dist_before_PCA_centerd, bins='auto')
+    plt.title("Distance before PCA - Centered (Moving is base)")
+    plt.ylabel("Frequncy")
+    plt.xlabel("Distance")
+    plt.savefig('../pics/dist_before_PCA_centerd.png', dpi=600)
+    plt.close()
+    # plt.show()
+    
     plt.hist(dist_before_PCA, bins='auto')
     plt.title("Distance before PCA (Moving is base)")
     plt.ylabel("Frequncy")
     plt.xlabel("Distance")
-    plt.savefig('dist_before_PCA.png', dpi=600)
+    plt.savefig('../pics/dist_before_PCA.png', dpi=600)
     plt.close()
     # plt.show()
 
@@ -48,7 +64,7 @@ def select_threshold(static, moving):
     plt.title("Distance After PCA (Moving is base) - distance < 20")
     plt.ylabel("Frequncy")
     plt.xlabel("Distance")
-    plt.savefig('dist_after_PCA3.png', dpi=600)
+    plt.savefig('../pics/dist_after_PCA3.png', dpi=600)
     plt.close()
     # plt.show()
 

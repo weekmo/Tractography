@@ -9,13 +9,18 @@ import numpy as np
 from os import listdir#, mkdir
 from os.path import isfile#, isdir
 
+from sklearn.cluster import KMeans
+
 from dipy.align.streamlinear import StreamlineLinearRegistration, compose_matrix44
 from dipy.tracking.streamline import set_number_of_points, transform_streamlines
 from dipy.core.optimize import Optimizer
 
-from .Utils import Clustering, distance_kdtree, pca_transform_norm
+from .Utils import (pca_transform_norm, distance_pc,distance_mdf,
+                    distance_pc_clustering_mean, distance_tract_clustering_mean,
+                    distance_pc_clustering_medoids, distance_tract_clustering_medoids)
 from .io import read_ply, write_trk, write_ply
 
+from pyclustering.cluster.kmedoids import kmedoids
 
 def register(static, moving, points=20):
     r""" Make StreamlineLinearRegistration simpler to use
@@ -91,11 +96,14 @@ def register_all(data_path):
 
 def registration_icp(static, moving,
                      points=20, pca=True, maxiter=100000,
-                     affine=[0, 0, 0, 0, 0, 0], clustering=None,
-                     medoids=[0, 1, 2], k=3, beta=999, max_dist=40):
+                     affine=[0, 0, 0, 0, 0, 0, 0],
+                     clustering=None,
+                     medoids=[0, 1, 2], k=3, beta=999, max_dist=40,
+                     dist='pc'):
     options = {'maxcor': 10, 'ftol': 1e-7,
                'gtol': 1e-5, 'eps': 1e-8,
                'maxiter': maxiter}
+    #options1 = {'xtol': 1e-6, 'ftol': 1e-6, 'maxiter': 1e6}
     if pca:
         moving = pca_transform_norm(static, moving, max_dist)
     else:
@@ -108,22 +116,37 @@ def registration_icp(static, moving,
     moving = set_number_of_points(moving, points)
 
     if clustering == 'kmeans':
-        dist = Clustering().distance_pc_clustering_mean
-        args = (static, moving, k, beta, max_dist)
+        kmeans = KMeans(k).fit(np.concatenate(moving))
+        idx = {i: np.where(kmeans.labels_ == i)[0] for i in range(k)}
+        #dist = Clustering().distance_pc_clustering_mean
+        if dist == 'pc':
+            dist_fun = distance_pc_clustering_mean
+        else:
+            dist_fun = distance_tract_clustering_mean
+        args = (static, moving,kmeans,idx, beta, max_dist)
         print('kmeans')
     elif clustering == 'kmedoids':
-        dist = Clustering().distance_pc_clustering_medoids
-        args = (static, moving, medoids, beta, max_dist)
+        k_medoids = kmedoids(np.concatenate(moving), medoids)
+        k_medoids.process()
+        #dist = Clustering().distance_pc_clustering_medoids
+        if dist == 'pc':
+            dist_fun = distance_pc_clustering_medoids
+        else:
+            dist_fun = distance_tract_clustering_medoids
+        args = (static, moving, k_medoids, beta, max_dist)
         print('kmedoids')
     else:
-        dist = distance_kdtree
-        args = (static, moving, beta, max_dist)
+        if dist == 'pc':
+            dist_fun = distance_pc
+            args = (static, moving, beta, max_dist)
+        else:
+            dist_fun = distance_mdf
+            args = (static, moving)
         print('Without Clustering')
-
-    m = Optimizer(dist, affine,
-                  args=args,
-                  method='L-BFGS-B',
-                  options=options)
+        
+    'L-BFGS-B,Powell'
+    m = Optimizer(dist_fun, affine,args=args,method='L-BFGS-B',options=options)
+    #m = Optimizer(dist, affine,args=args,method='Powell',options=options1)
 
     m.print_summary()
     mat = compose_matrix44(m.xopt)
