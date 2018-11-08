@@ -67,7 +67,19 @@ def select_threshold(static, moving):
     plt.savefig('../pics/dist_after_PCA3.png', dpi=600)
     plt.close()
     # plt.show()
+    
+    
+    
+    costs = np.array(ut.costs)/1000
+    plt.plot(costs)
+    plt.title("Cost valuse during optimization")
+    plt.ylabel("Costs (k)")
+    plt.xlabel("Number of evaluations")
+    plt.savefig('pics/cost.png', dpi=600)
+    plt.close()
+    
+    
 
 static = read_ply('../data/132118/m_ex_atr-left_shore.ply')
 moving = read_ply('../data/150019/m_ex_atr-right_shore.ply')
-# select_threshold(static,moving)
+select_threshold(static,moving)

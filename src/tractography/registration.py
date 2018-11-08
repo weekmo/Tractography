@@ -147,7 +147,6 @@ def registration_icp(static, moving,
     'L-BFGS-B,Powell'
     m = Optimizer(dist_fun, affine,args=args,method='L-BFGS-B',options=options)
     #m = Optimizer(dist, affine,args=args,method='Powell',options=options1)
-
     m.print_summary()
     mat = compose_matrix44(m.xopt)
     return transform_streamlines(original_moving, mat)
