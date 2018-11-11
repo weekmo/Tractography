@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 
+from nibabel.affines import apply_affine
 from dipy.segment.quickbundles import bundles_distances_mdf
 from dipy.tracking.streamline import transform_streamlines,set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
@@ -28,12 +29,12 @@ def normalize(bundle):
     return new_bundle
 
 
-def kd_tree_cost(static, moving, max_dist):
+def kd_tree_cost(con_static, con_moving, max_dist):
     """
     Helping function uses Points Cloud
     """
-    tree = KDTree(moving)
-    dist_list = np.hstack(tree.query(static, k=1)[0])
+    tree = KDTree(con_moving)
+    dist_list = np.hstack(tree.query(con_static, k=1)[0])
     return np.sum(dist_list[np.where(dist_list < max_dist)])
 
 def mdf_cost(static, moving):
@@ -238,3 +239,18 @@ def pca_transform_norm(static, moving, max_dist):
     del aff
     del aff2
     return new_move
+
+def dist_new(x0,con_static,con_moving,shape,r,max_dist):
+    affines = np.reshape(x0,shape)
+    con_moving = np.array([apply_affine(compose_matrix44(mat),s) for mat,s in zip(affines,con_moving)])
+    
+    dist_cost = kd_tree_cost(con_static,con_moving,max_dist)
+    #print("dist",dist_cost)
+    
+    kdtree = KDTree(con_moving)
+    idx = kdtree.query_radius(con_moving,r)
+
+    stiff_cost = np.sum([np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]]) for i in range(len(con_moving))])
+    #print("stiff",stiff_cost)
+    costs.append([dist_cost,stiff_cost])
+    return dist_cost+stiff_cost

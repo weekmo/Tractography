@@ -19,7 +19,7 @@ from src.tractography.Utils import pca_transform_norm, normalize
 
 k = 20
 static = read_ply('../data/132118/m_ex_atr-left_shore.ply')
-moving = read_ply('../data/150019/m_ex_atr-right_shore.ply')
+moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
 
 con_static = np.concatenate(static)
 con_moving = np.concatenate(moving)
@@ -36,6 +36,7 @@ idx = kdtree.query_radius(con_moving,.3)
 
 cost=0
 for i in range(len(con_moving)):
-    x = con_moving[i]
-    cost += np.sum([np.linalg.norm(x - i) for i in con_moving[idx[i]]])
+    cost += np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]])
 print(cost)
+
+print([np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]]) for i in range(len(con_moving))])
