@@ -28,13 +28,11 @@ size 07, translation + rotation + isotropic scaling.
 size 09, translation + rotation + anisotropic scaling.
 size 12, translation + rotation + scaling + shearing.
 """
-static = read_ply('data/132118/m_ex_atr-left_shore.ply')
-moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
+static = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+moving = read_ply('../data/150019/m_ex_atr-right_shore.ply')
 
 moving1 = registration_icp(static, moving, clustering='kmedoids',dist='tract',pca=False)
 moving2 = registration_icp(static, moving, clustering='kmeans',pca=False)
 moving3 = registration_icp(static, moving, dist='tract',pca=False)
 
 draw_bundles([static,moving],[[1,0,0],[0,0,1]])
-ut.costs = []
-plt.plot(ut.costs)

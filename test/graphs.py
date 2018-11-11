@@ -17,6 +17,7 @@ from src.tractography.Utils import (kd_tree_cost,
                                     pca_transform_norm,
                                     distance_tract,
                                     distance_mdf)
+from src.tractography import Utils as ut
 from src.tractography.registration import registration_icp
 from open3d import draw_geometries
 from dipy.tracking.streamline import set_number_of_points
