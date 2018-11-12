@@ -96,7 +96,7 @@ def register_all(data_path):
 
 def registration_icp(static, moving,
                      points=20, pca=True, maxiter=100000,
-                     affine=[0, 0, 0, 0, 0, 0, 0],
+                     affine=[0, 0, 0, 0, 0, 0, 1],
                      clustering=None,
                      medoids=[0, 1, 2], k=3, beta=999, max_dist=40,
                      dist='pc'):

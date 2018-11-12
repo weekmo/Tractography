@@ -240,7 +240,7 @@ def pca_transform_norm(static, moving, max_dist):
     del aff2
     return new_move
 
-def dist_new(x0,con_static,con_moving,shape,r,max_dist):
+def dist_new(x0,con_static,con_moving,shape,r,max_dist,lam):
     affines = np.reshape(x0,shape)
     con_moving = np.array([apply_affine(compose_matrix44(mat),s) for mat,s in zip(affines,con_moving)])
     
@@ -250,7 +250,7 @@ def dist_new(x0,con_static,con_moving,shape,r,max_dist):
     kdtree = KDTree(con_moving)
     idx = kdtree.query_radius(con_moving,r)
 
-    stiff_cost = np.sum([np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]]) for i in range(len(con_moving))])
+    stiff_cost = lam*np.sum([np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]]) for i in range(len(con_moving))])
     #print("stiff",stiff_cost)
     costs.append([dist_cost,stiff_cost])
     return dist_cost+stiff_cost
