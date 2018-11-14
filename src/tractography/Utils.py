@@ -254,3 +254,6 @@ def dist_new(x0,con_static,con_moving,shape,r,max_dist,lam):
     #print("stiff",stiff_cost)
     costs.append([dist_cost,stiff_cost])
     return dist_cost+stiff_cost
+
+
+

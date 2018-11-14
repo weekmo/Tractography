@@ -2,41 +2,33 @@
 # x = [["a","b"], ["c"]]
 # print([j for i in x for j in i])
 import numpy as np
-from random import random
-from sklearn.cluster import KMeans
 from sklearn.neighbors import KDTree
-from sklearn.metrics.pairwise import paired_euclidean_distances
 
 #from scipy.sparse.linalg import lsqr
 #from scipy.sparse import csc_matrix
-
-from dipy.tracking.streamline import transform_streamlines
+from nibabel.affines import apply_affine
+from dipy.tracking.streamline import transform_streamlines,set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
 
 from src.tractography.io import read_ply
-from src.tractography.viz import draw_bundles, clusters_colors, draw_clusters
-from src.tractography.Utils import pca_transform_norm, normalize
+from src.tractography.viz import draw_bundles
+from src.tractography.Utils import kd_tree_cost
 
-k = 20
-static = read_ply('../data/132118/m_ex_atr-left_shore.ply')
-moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
 
-con_static = np.concatenate(static)
-con_moving = np.concatenate(moving)
 
-# Clustering
-kmeans = KMeans(k).fit(con_moving)
-colours = [[random(), random(), random()] for _ in range(k)]
-new_moving = clusters_colors(moving,colours,kmeans.labels_)
-draw_clusters(new_moving)
 
-# KDTree
-kdtree = KDTree(con_moving)
-idx = kdtree.query_radius(con_moving,.3)
+def dist_new(x0,sep_static,sep_moving,shape,max_dist):
+    affines = np.reshape(x0,shape)
+    con_moving = np.array([apply_affine(compose_matrix44(mat),s) for mat,s in zip(affines,sep_moving)])
+    
+    dist_cost = kd_tree_cost(np.concatenate(sep_static),np.concatenate(con_moving),max_dist)
+    return dist_cost
 
-cost=0
-for i in range(len(con_moving)):
-    cost += np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]])
-print(cost)
+shape = (20,7)
 
-print([np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]]) for i in range(len(con_moving))])
+sep_static = set_number_of_points(static,shape[0])
+sep_moving = set_number_of_points(moving,shape[0])
+
+x0 = [[0,0,0, 0,0,0, 1] for _ in range(shape[0])]
+
+print(dist_new(x0,sep_static,sep_moving,shape,500))

@@ -14,38 +14,48 @@ from scipy.sparse.linalg import LinearOperator
 
 from nibabel.affines import apply_affine
 from dipy.core.optimize import Optimizer
-from dipy.tracking.streamline import transform_streamlines
+from dipy.tracking.streamline import transform_streamlines, set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
 
 from src.tractography.io import read_ply
 from src.tractography.viz import draw_bundles, clusters_colors, draw_clusters
 from src.tractography.Utils import pca_transform_norm, normalize, kd_tree_cost, dist_new, costs
 
-
-static = read_ply('data/132118/m_ex_atr-left_shore.ply')
+shape = (20,7)
+affines = []
+mat = np.array([20,20,20,180,180,120,1])
+for i in range(shape[0]):
+    mat[:-1] = mat[:-1]/1.23
+    affines.append(compose_matrix44(mat))
+    
+#static = read_ply('data/132118/m_ex_atr-left_shore.ply')
 moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
 
-con_static = np.concatenate(static)
-con_moving = np.concatenate(moving)
+#con_static = np.concatenate(static)
+#con_moving = np.concatenate(moving)
 
-x0 = np.array([[0,0,0, 0,0,0, 1] for __ in con_moving])
+sep_moving = set_number_of_points(moving,shape[0])
 
-options = {'maxcor': 10, 'ftol': 1e-7,
-               'gtol': 1e-5, 'eps': 1e-8,
-               'maxiter': 100000}
-shape = (len(con_moving),7)
+new_moving = []
+for i,j in zip(sep_moving,moving):
+    kdtree = KDTree(j)
+    # Set used to avoid repeatition if the # of poits less than the sat #
+    new_moving.append(j[list(set(np.hstack(kdtree.query(i,k=1)[1])))])
+
+print(moving[0][[1,2,3,1]])
+
+
+
+for i in range(lenght):
+    affines.append(compose_matrix44((((lenght-i)/lenght)*l1) + ((i/lenght)*l2)))
+
+new_con_moving = np.array([apply_affine(mat,s) for mat,s in zip(affines,moving[0])])
+
+draw_bundles([new_moving])
+'''
+options = {'maxcor': 10, 'ftol': 1e-7,'gtol': 1e-5, 'eps': 1e-8,'maxiter': 100000}
+
+shape = (len(con_moving),len(x0[0]))
 m = Optimizer(dist_new, x0,args=(con_static,con_moving,shape,.3,500),method='L-BFGS-B',options=options)
 m.print_summary()
-
-affines = np.reshape(x0,shape)
-new_moving = np.array([apply_affine(compose_matrix44(mat),vertex) for mat,vertex in zip(affines,con_moving)])
-
-dist_cost = kd_tree_cost(con_moving,new_moving,500)
-print("Dist Cost: ",dist_cost)
-
-kdtree = KDTree(con_moving)
-idx = kdtree.query_radius(con_moving,.3)
-
-stiff_cost = np.sum([np.sum([np.linalg.norm(new_moving[i] - j) for j in new_moving[idx[i]]]) for i in range(len(new_moving))])
-print("stiff",stiff_cost)
-dist_new(x0,con_moving,con_moving,shape,.3,500)
+'''
