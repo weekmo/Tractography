@@ -240,9 +240,37 @@ def pca_transform_norm(static, moving, max_dist):
     del aff2
     return new_move
 
-def dist_new(x0,con_static,con_moving,shape,r,max_dist,lam):
-    affines = np.reshape(x0,shape)
-    con_moving = np.array([apply_affine(compose_matrix44(mat),s) for mat,s in zip(affines,con_moving)])
+def transform(x0,moving):
+    idx = [np.hstack(KDTree(j).query(i,k=1)[1]) for i,j in zip(set_number_of_points(moving,len(x0)),moving)]
+    new_moving = []
+    for i in range(len(idx)):
+        temp = []
+        index = 0
+        for k in range(len(x0)-1):
+            length2 = idx[i][k+1]-idx[i][k]
+            j=0
+            for index in range(idx[i][k],idx[i][k+1]):
+                mat1 = x0[k].copy()
+                mat1[:-1] = ((length2-j)/length2)*mat1[:-1]
+                #mat1 = ((length2-i)/length2)*mat1
+                mat2 = x0[k+1].copy()
+                mat2[:-1] = (j/length2)*mat2[:-1]
+                #mat2 = (i/length2)*mat2
+                mat3 = [0,0,0, 0,0,0, 1]
+                mat3[:-1] = mat2[:-1]+mat1[:-1]
+                mat3[-1] = mat2[-1]*mat1[-1]
+                temp.append(apply_affine(compose_matrix44(mat3),moving[i][index]))
+                j+=1
+                index+=1
+        new_moving.append(np.vstack(temp))
+    return new_moving
+
+def dist_new(x0,static,moving,points,r,max_dist,lam):
+    x0 = np.reshape(x0,(points,7))
+    moving = transform(x0,moving)
+    
+    con_static = np.concatenate(static)
+    con_moving = np.concatenate(moving)
     
     dist_cost = kd_tree_cost(con_static,con_moving,max_dist)
     #print("dist",dist_cost)
@@ -253,7 +281,9 @@ def dist_new(x0,con_static,con_moving,shape,r,max_dist,lam):
     stiff_cost = lam*np.sum([np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]]) for i in range(len(con_moving))])
     #print("stiff",stiff_cost)
     costs.append([dist_cost,stiff_cost])
-    return dist_cost+stiff_cost
+    cost = dist_cost+stiff_cost
+    #print(cost)
+    return cost
 
 
 
