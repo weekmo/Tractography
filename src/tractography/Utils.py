@@ -294,17 +294,10 @@ def dist_new(x0,static,moving,points,r,max_dist,lam):
     stiff_cost = lam*np.sum([np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]]) for i in range(len(con_moving))])
     """
     '''Linkage cost'''
-    #lnk_cost=link_cost(moving)
+    lnk_cost=link_cost(moving)*lam
     #print("stiff",stiff_cost)
     #costs.append([dist_cost,stiff_cost,lnk_cost])
-    costs.append(dist_cost)
-    cost = dist_cost
+    costs.append([dist_cost,lnk_cost])
+    cost = dist_cost+lnk_cost
     #print(dist_cost,stiff_cost,lnk_cost)
     return cost
-
-
-# save affine in a file
-# screen shot for transformation
-# grafe
-# apply without stiffness and link
-# 
