@@ -17,6 +17,15 @@ def make9D(bundle):
     cov = [[np.mean(i, axis=0), np.cov(i.T)] for i in bundle]
     return np.array([np.hstack((i, j[0], j[1, 1], j[1, 2], j[2, 2])) for i, j in cov])
 
+def link_cost(bundle):
+    cost =0
+    for tract in bundle:
+        length = len(tract)
+        for i in range(length):
+            domain = np.array([i-2,i-1,i+1,i+2])
+            domain = domain[(domain>=0) & (domain<length)]
+            cost+=np.sum([np.linalg.norm(tract[i]-j) for j in tract[domain]])
+    return cost
 
 def normalize(bundle):
     """
@@ -250,15 +259,16 @@ def transform(x0,moving):
             length2 = idx[i][k+1]-idx[i][k]
             j=0
             for index in range(idx[i][k],idx[i][k+1]):
-                mat1 = x0[k].copy()
+                mat1 = np.copy(x0[k]).astype(float)
                 mat1[:-1] = ((length2-j)/length2)*mat1[:-1]
-                #mat1 = ((length2-i)/length2)*mat1
-                mat2 = x0[k+1].copy()
+                
+                mat2 = np.copy(x0[k+1]).astype(float)
                 mat2[:-1] = (j/length2)*mat2[:-1]
-                #mat2 = (i/length2)*mat2
-                mat3 = [0,0,0, 0,0,0, 1]
+                
+                mat3 = np.zeros((7,))
                 mat3[:-1] = mat2[:-1]+mat1[:-1]
                 mat3[-1] = mat2[-1]*mat1[-1]
+                
                 temp.append(apply_affine(compose_matrix44(mat3),moving[i][index]))
                 j+=1
                 index+=1
@@ -272,18 +282,29 @@ def dist_new(x0,static,moving,points,r,max_dist,lam):
     con_static = np.concatenate(static)
     con_moving = np.concatenate(moving)
     
+    '''Distance Cost'''
     dist_cost = kd_tree_cost(con_static,con_moving,max_dist)
     #print("dist",dist_cost)
     
+    '''Stiffness Cost'''
+    """
     kdtree = KDTree(con_moving)
     idx = kdtree.query_radius(con_moving,r)
 
     stiff_cost = lam*np.sum([np.sum([np.linalg.norm(con_moving[i] - j) for j in con_moving[idx[i]]]) for i in range(len(con_moving))])
+    """
+    '''Linkage cost'''
+    #lnk_cost=link_cost(moving)
     #print("stiff",stiff_cost)
-    costs.append([dist_cost,stiff_cost])
-    cost = dist_cost+stiff_cost
-    #print(cost)
+    #costs.append([dist_cost,stiff_cost,lnk_cost])
+    costs.append(dist_cost)
+    cost = dist_cost
+    #print(dist_cost,stiff_cost,lnk_cost)
     return cost
 
 
-
+# save affine in a file
+# screen shot for transformation
+# grafe
+# apply without stiffness and link
+# 
