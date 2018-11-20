@@ -5,7 +5,7 @@ dist/
 .idea/
 registration.iml
 data/
-__pycache__/
 *.png
+__pycache__/
 .spyproject/
 pics/
