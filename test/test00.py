@@ -25,22 +25,22 @@ from src.tractography.io import read_ply
 from src.tractography.viz import draw_bundles, clusters_colors, draw_clusters
 from src.tractography.Utils import costs, transform,dist_new
 
-static = read_ply('data/132118/m_ex_atr-left_shore.ply')
-moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
+static = read_ply('../data/132118/m_ex_atr-left_shore.ply')
+moving = read_ply('../data/150019/m_ex_atr-right_shore.ply')
 
 #con_static = np.concatenate(static)
 #con_moving = np.concatenate(moving)
 
-length = 5
+length = 2
 x0 = np.array([[0,0,0, 0,0,0, 1] for _ in range(length)])
-options = {'maxcor': 10, 'ftol': 1e-7, 'gtol': 1e-5, 'eps': 1e-8, 'maxiter': 100000}
+options = {'maxcor': 10, 'ftol': 1e-7, 'gtol': 1e-5, 'eps': 1e-8, 'maxiter': 1000}
 start = time()
-m = Optimizer(dist_new, x0,args=(static,moving,length,.3,500,1),method='L-BFGS-B',options=options)
+m = Optimizer(dist_new, x0,args=(static,moving,length,500,70),method='L-BFGS-B',options=options)
 end = time()
 
 print("Time: ",end-start)
 m.print_summary()
-np.save('dist_link.npy',m.xopt)
+np.save('dist_link2.npy',m.xopt)
 x1 = np.reshape(m.xopt,(5,7))
 new_moving = transform(x1,moving)
 draw_bundles([new_moving])
@@ -51,6 +51,6 @@ minutes = int(((end-start)%3600)/60)
 seconds = int(((end-start)%3600)%60)
 
 plt.plot(costs)
-plt.title("Cost Function (Dist and Link) - Time: {:02}:{}:{}".format(hours,minutes,seconds))
+plt.title("Cost Function (Dist and Link) - Time: {:02}:{}:{}\nMaxiter=1000, lambda=70".format(hours,minutes,seconds))
 plt.legend(['Distance','Link'])
-plt.savefig("cost_plot4.png",dpi=600)
+plt.savefig("../pics/cost_plot5.png",dpi=600)

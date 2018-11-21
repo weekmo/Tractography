@@ -1,0 +1,299 @@
+
+
+bfgs
+====
+
+Minimization of scalar function of one or more variables using the
+BFGS algorithm.
+
+Options
+-------
+disp : bool
+    Set to True to print convergence messages.
+maxiter : int
+    Maximum number of iterations to perform.
+gtol : float
+    Gradient norm must be less than `gtol` before successful
+    termination.
+norm : float
+    Order of norm (Inf is max, -Inf is min).
+eps : float or ndarray
+    If `jac` is approximated, use this value for the step size.
+
+cg
+==
+
+Minimization of scalar function of one or more variables using the
+conjugate gradient algorithm.
+
+Options
+-------
+disp : bool
+    Set to True to print convergence messages.
+maxiter : int
+    Maximum number of iterations to perform.
+gtol : float
+    Gradient norm must be less than `gtol` before successful
+    termination.
+norm : float
+    Order of norm (Inf is max, -Inf is min).
+eps : float or ndarray
+    If `jac` is approximated, use this value for the step size.
+
+cobyla
+======
+
+Minimize a scalar function of one or more variables using the
+Constrained Optimization BY Linear Approximation (COBYLA) algorithm.
+
+Options
+-------
+rhobeg : float
+    Reasonable initial changes to the variables.
+tol : float
+    Final accuracy in the optimization (not precisely guaranteed).
+    This is a lower bound on the size of the trust region.
+disp : bool
+    Set to True to print convergence messages. If False,
+    `verbosity` is ignored as set to 0.
+maxiter : int
+    Maximum number of function evaluations.
+catol : float
+    Tolerance (absolute) for constraint violations
+
+dogleg
+======
+
+Minimization of scalar function of one or more variables using
+the dog-leg trust-region algorithm.
+
+Options
+-------
+initial_trust_radius : float
+    Initial trust-region radius.
+max_trust_radius : float
+    Maximum value of the trust-region radius. No steps that are longer
+    than this value will be proposed.
+eta : float
+    Trust region related acceptance stringency for proposed steps.
+gtol : float
+    Gradient norm must be less than `gtol` before successful
+    termination.
+
+l-bfgs-b
+========
+
+Minimize a scalar function of one or more variables using the L-BFGS-B
+algorithm.
+
+Options
+-------
+disp : bool
+   Set to True to print convergence messages.
+maxcor : int
+    The maximum number of variable metric corrections used to
+    define the limited memory matrix. (The limited memory BFGS
+    method does not store the full hessian but uses this many terms
+    in an approximation to it.)
+ftol : float
+    The iteration stops when ``(f^k -
+    f^{k+1})/max{|f^k|,|f^{k+1}|,1} <= ftol``.
+gtol : float
+    The iteration will stop when ``max{|proj g_i | i = 1, ..., n}
+    <= gtol`` where ``pg_i`` is the i-th component of the
+    projected gradient.
+eps : float
+    Step size used for numerical approximation of the jacobian.
+disp : int
+    Set to True to print convergence messages.
+maxfun : int
+    Maximum number of function evaluations.
+maxiter : int
+    Maximum number of iterations.
+maxls : int, optional
+    Maximum number of line search steps (per iteration). Default is 20.
+
+Notes
+-----
+The option `ftol` is exposed via the `scipy.optimize.minimize` interface,
+but calling `scipy.optimize.fmin_l_bfgs_b` directly exposes `factr`. The
+relationship between the two is ``ftol = factr * numpy.finfo(float).eps``.
+I.e., `factr` multiplies the default machine floating-point precision to
+arrive at `ftol`.
+
+nelder-mead
+===========
+
+Minimization of scalar function of one or more variables using the
+Nelder-Mead algorithm.
+
+Options
+-------
+disp : bool
+    Set to True to print convergence messages.
+maxiter, maxfev : int
+    Maximum allowed number of iterations and function evaluations.
+    Will default to ``N*200``, where ``N`` is the number of
+    variables, if neither `maxiter` or `maxfev` is set. If both
+    `maxiter` and `maxfev` are set, minimization will stop at the
+    first reached.
+initial_simplex : array_like of shape (N + 1, N)
+    Initial simplex. If given, overrides `x0`.
+    ``initial_simplex[j,:]`` should contain the coordinates of
+    the j-th vertex of the ``N+1`` vertices in the simplex, where
+    ``N`` is the dimension.
+xatol : float, optional
+    Absolute error in xopt between iterations that is acceptable for
+    convergence.
+fatol : number, optional
+    Absolute error in func(xopt) between iterations that is acceptable for
+    convergence.
+adaptive : bool, optional
+    Adapt algorithm parameters to dimensionality of problem. Useful for
+    high-dimensional minimization [1]_.
+
+References
+----------
+.. [1] Gao, F. and Han, L.
+   Implementing the Nelder-Mead simplex algorithm with adaptive
+   parameters. 2012. Computational Optimization and Applications.
+   51:1, pp. 259-277
+
+newton-cg
+=========
+
+Minimization of scalar function of one or more variables using the
+Newton-CG algorithm.
+
+Note that the `jac` parameter (Jacobian) is required.
+
+Options
+-------
+disp : bool
+    Set to True to print convergence messages.
+xtol : float
+    Average relative error in solution `xopt` acceptable for
+    convergence.
+maxiter : int
+    Maximum number of iterations to perform.
+eps : float or ndarray
+    If `jac` is approximated, use this value for the step size.
+
+powell
+======
+
+Minimization of scalar function of one or more variables using the
+modified Powell algorithm.
+
+Options
+-------
+disp : bool
+    Set to True to print convergence messages.
+xtol : float
+    Relative error in solution `xopt` acceptable for convergence.
+ftol : float
+    Relative error in ``fun(xopt)`` acceptable for convergence.
+maxiter, maxfev : int
+    Maximum allowed number of iterations and function evaluations.
+    Will default to ``N*1000``, where ``N`` is the number of
+    variables, if neither `maxiter` or `maxfev` is set. If both
+    `maxiter` and `maxfev` are set, minimization will stop at the
+    first reached.
+direc : ndarray
+    Initial set of direction vectors for the Powell method.
+
+slsqp
+=====
+
+Minimize a scalar function of one or more variables using Sequential
+Least SQuares Programming (SLSQP).
+
+Options
+-------
+ftol : float
+    Precision goal for the value of f in the stopping criterion.
+eps : float
+    Step size used for numerical approximation of the Jacobian.
+disp : bool
+    Set to True to print convergence messages. If False,
+    `verbosity` is ignored and set to 0.
+maxiter : int
+    Maximum number of iterations.
+
+tnc
+===
+
+Minimize a scalar function of one or more variables using a truncated
+Newton (TNC) algorithm.
+
+Options
+-------
+eps : float
+    Step size used for numerical approximation of the jacobian.
+scale : list of floats
+    Scaling factors to apply to each variable.  If None, the
+    factors are up-low for interval bounded variables and
+    1+|x] fo the others.  Defaults to None
+offset : float
+    Value to subtract from each variable.  If None, the
+    offsets are (up+low)/2 for interval bounded variables
+    and x for the others.
+disp : bool
+   Set to True to print convergence messages.
+maxCGit : int
+    Maximum number of hessian*vector evaluations per main
+    iteration.  If maxCGit == 0, the direction chosen is
+    -gradient if maxCGit < 0, maxCGit is set to
+    max(1,min(50,n/2)).  Defaults to -1.
+maxiter : int
+    Maximum number of function evaluation.  if None, `maxiter` is
+    set to max(100, 10*len(x0)).  Defaults to None.
+eta : float
+    Severity of the line search. if < 0 or > 1, set to 0.25.
+    Defaults to -1.
+stepmx : float
+    Maximum step for the line search.  May be increased during
+    call.  If too small, it will be set to 10.0.  Defaults to 0.
+accuracy : float
+    Relative precision for finite difference calculations.  If
+    <= machine_precision, set to sqrt(machine_precision).
+    Defaults to 0.
+minfev : float
+    Minimum function value estimate.  Defaults to 0.
+ftol : float
+    Precision goal for the value of f in the stopping criterion.
+    If ftol < 0.0, ftol is set to 0.0 defaults to -1.
+xtol : float
+    Precision goal for the value of x in the stopping
+    criterion (after applying x scaling factors).  If xtol <
+    0.0, xtol is set to sqrt(machine_precision).  Defaults to
+    -1.
+gtol : float
+    Precision goal for the value of the projected gradient in
+    the stopping criterion (after applying x scaling factors).
+    If gtol < 0.0, gtol is set to 1e-2 * sqrt(accuracy).
+    Setting it to 0.0 is not recommended.  Defaults to -1.
+rescale : float
+    Scaling factor (in log10) used to trigger f value
+    rescaling.  If 0, rescale at each iteration.  If a large
+    value, never rescale.  If < 0, rescale is set to 1.3.
+
+trust-ncg
+=========
+
+Minimization of scalar function of one or more variables using
+the Newton conjugate gradient trust-region algorithm.
+
+Options
+-------
+initial_trust_radius : float
+    Initial trust-region radius.
+max_trust_radius : float
+    Maximum value of the trust-region radius. No steps that are longer
+    than this value will be proposed.
+eta : float
+    Trust region related acceptance stringency for proposed steps.
+gtol : float
+    Gradient norm must be less than `gtol` before successful
+    termination.
+None
