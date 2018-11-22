@@ -31,3 +31,21 @@ def dist_new(x0,static,moving,points,max_dist,lam):
     cost = dist_cost+lnk_cost
     #print(dist_cost,stiff_cost,lnk_cost)
     return cost
+
+
+v=[]
+for i in range(7):
+    j = i-2 if i-2>0 else 0
+    x = [[j,i],[j+1,i],[j+2,i]]
+    [v.append(k) for k in x if k[1]>=k[0] and k[0] <=4]
+v=np.array(v)
+u = [[1,1,1],[2,2,2],[3,3,3],[4,4,4],[5,5,5]]
+u = np.concatenate(u)
+D = coo_matrix((u,(v[:,0],v[:,1])),shape=(5,7)).tocsr()
+
+print(D.toarray())
+
+dim = []
+for i in range(len_d):
+    for j in range(i,i+3):
+        dim.append([i,j])

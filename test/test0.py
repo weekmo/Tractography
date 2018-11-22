@@ -1,13 +1,30 @@
 import numpy as np
-from src.tractography.Utils import transform
+from scipy.sparse import csc_matrix
+from scipy.sparse import coo_matrix
+from scipy.sparse.linalg import lsqr
+from dipy.tracking.streamline import set_number_of_points
 from src.tractography.io import read_ply
-from src.tractography.viz import draw_bundles
 
-#bundle = read_ply('../data/150019/m_ex_atr-right_shore.ply')
-line = [np.array([[i,i,0] for i in range(200)]),np.array([[i,i,3] for i in range(200)])]
-x0 = [[0,0,0, 0,0,0, 1],[2,2,2, 30,30,30, 1],[4,4,4, 60,60,60, 1],[6,6,6, 90,90,90, 1]]
+bundle= read_ply('../data/150019/m_ex_atr-right_shore.ply')
+bundle = set_number_of_points(bundle,20)
 
-#new_bundle = transform(x0,bundle)
-new_line = transform(x0,line)
+d = bundle[0]
+len_d = len(d)
 
-draw_bundles([new_line,line])
+dim = []
+j=0
+for i in range(len_d):
+    for _ in range(3):
+        dim.append([i,j])
+        j+=1
+
+dim=np.array(dim)
+shape=(len_d,len_d*3)
+D = coo_matrix((np.concatenate(d),(dim[:,0],dim[:,1])),shape=shape).tocsr()
+U = np.concatenate(bundle[180])
+
+print(D.shape)
+print(U.shape)
+
+x = lsqr(D.T,U)[0]
+print(x)
