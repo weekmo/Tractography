@@ -21,10 +21,17 @@ for i in range(len_d):
 dim=np.array(dim)
 shape=(len_d,len_d*3)
 D = coo_matrix((np.concatenate(d),(dim[:,0],dim[:,1])),shape=shape).tocsr()
-U = np.concatenate(bundle[180])
+
+u = bundle[180]
+
+x = lsqr(D.T,np.concatenate(u))[0]
+print(x)
 
 print(D.shape)
-print(U.shape)
+print(np.concatenate(u).shape)
 
-x = lsqr(D.T,U)[0]
-print(x)
+A = csc_matrix([[1., 0.], [1., 1.], [0., 1.]], dtype=float)
+
+b = np.array([0., 0., 0.], dtype=float)
+print(A.shape)
+print(b.shape)
