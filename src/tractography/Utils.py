@@ -6,10 +6,14 @@ from dipy.segment.quickbundles import bundles_distances_mdf
 from dipy.tracking.streamline import transform_streamlines,set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 from sklearn.neighbors import KDTree
 from sklearn.decomposition import PCA
 #from src.tractography.viz import draw_bundles
 costs = []
+counter=0
 def make9D(bundle):
     """
     Helping function uses 9D tract
@@ -275,8 +279,22 @@ def transform(x0,moving):
         new_moving.append(np.vstack(temp))
     return new_moving
 
+def plot_process(static,moving):
+    global counter
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    for tract in moving:
+        ax.plot(tract[:,0],tract[:,1],tract[:,2],color='blue')
+    for tract in static:
+        ax.plot(tract[:,0],tract[:,1],tract[:,2],color='red')
+    plt.savefig("3d_"+str(counter)+".png",dpi=600)
+    plt.close()
+    print("Plot # ",counter)
+    counter+=1
+
 def dist_new(x0,static,moving,points,max_dist,lam):
     x0 = np.reshape(x0,(points,7))
+    lnk_cost_before=link_cost(moving)
     moving = transform(x0,moving)
     
     con_static = np.concatenate(static)
@@ -286,8 +304,8 @@ def dist_new(x0,static,moving,points,max_dist,lam):
     dist_cost = kd_tree_cost(con_static,con_moving,max_dist)
     
     '''Linkage cost'''
-    lnk_cost=link_cost(moving)*lam
-    
+    lnk_cost=np.linalg.norm(link_cost(moving)-lnk_cost_before)*lam
+    plot_process(static,moving)
     costs.append([dist_cost,lnk_cost])
     cost = dist_cost+lnk_cost
     return cost
