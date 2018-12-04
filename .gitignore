@@ -9,3 +9,5 @@ data/
 __pycache__/
 .spyproject/
 pics/
+.pydevproject
+.project

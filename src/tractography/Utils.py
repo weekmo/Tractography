@@ -280,21 +280,30 @@ def transform(x0,moving):
     return new_moving
 
 def plot_process(static,moving):
+    global costs
     global counter
+    plt.plot(costs)
+    plt.title("Round "+str(counter)+"\nDistance: "+str(round(costs[counter][0]))+
+              "  |  Link: "+str(round(costs[counter][1])))
+    plt.legend(['Distance','Link'])
+    plt.show()
+    plt.close()
+    
+    
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     for tract in moving:
         ax.plot(tract[:,0],tract[:,1],tract[:,2],color='blue')
     for tract in static:
         ax.plot(tract[:,0],tract[:,1],tract[:,2],color='red')
-    plt.savefig("3d_"+str(counter)+".png",dpi=600)
+    plt.savefig("pics/3d0"+str(counter)+".png",dpi=600)
     plt.close()
-    print("Plot # ",counter)
     counter+=1
+    
 
-def dist_new(x0,static,moving,points,max_dist,lam):
+def dist_new(x0,static,moving,points,lnk_cost_before,max_dist,lam):
     x0 = np.reshape(x0,(points,7))
-    lnk_cost_before=link_cost(moving)
+    # ToDo this must be global variable
     moving = transform(x0,moving)
     
     con_static = np.concatenate(static)
@@ -305,7 +314,7 @@ def dist_new(x0,static,moving,points,max_dist,lam):
     
     '''Linkage cost'''
     lnk_cost=np.linalg.norm(link_cost(moving)-lnk_cost_before)*lam
-    plot_process(static,moving)
     costs.append([dist_cost,lnk_cost])
+    plot_process(static,moving)
     cost = dist_cost+lnk_cost
     return cost
