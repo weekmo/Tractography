@@ -5,29 +5,25 @@ Created on Sun Nov 25 15:06:39 2018
 @author: mabdelgadi
 """
 import numpy as np
-from nibabel.affines import apply_affine
-from dipy.align.streamlinear import compose_matrix44
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+#import matplotlib.pyplot as plt
 
-from src.tractography.viz import draw_bundles
+from sklearn.cluster import KMeans
+
+from src.tractography.viz import clusters_colors,draw_clusters,lines_colors
 from src.tractography.io import read_ply
+from src.tractography.Utils import transform
 
-moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
-static = read_ply('data/132118/m_ex_atr-left_shore.ply')
-
-xyz=np.array([[i,i,i] for i in range(5)])
-aff = [compose_matrix44([0,0,0, i,i,i]) for i in range(0,150,30)]
-
-new_xyz = np.array([apply_affine(f,p) for f,p in zip(aff,xyz)])
+moving = read_ply('data/150019/m_ex_atr-left_shore.ply')
 
 
+idx = [np.hstack(KDTree(j).query(i,k=1)[1]) for i,j in zip(set_number_of_points(moving,5),moving)]
 
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-for tract in moving:
-    ax.plot(tract[:,0],tract[:,1],tract[:,2],color='blue')
-for tract in static:
-    ax.plot(tract[:,0],tract[:,1],tract[:,2],color='red')
-plt.savefig("3d.png",dpi=600)
+xyz = lines_colors(moving,[[1,0,0],[0,1,0],[0,0,1],[1,0,1]],idx)
+print(xyz)
+
+con_moving = np.concatenate(moving)
+mov_cluster = KMeans(n_clusters=5).fit(con_moving)
+
+mov_cluster = clusters_colors(moving,[[1,0,0],[0,1,0],[0,0,1],[1,1,0],[1,0,1]],mov_cluster.labels_)
+draw_clusters(xyz)
