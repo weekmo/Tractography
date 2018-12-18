@@ -235,12 +235,12 @@ def pca_transform_norm(static, moving, max_dist):
         new_moving = [np.dot((j - norm_moving_mean), aff2) + norm_static_mean for j in norm_moving]
         #draw_bundles([new_moving,norm_static])
         cost = kd_tree_cost(con_norm_static, np.concatenate(new_moving), max_dist)
-        #print(cost)
+        print(cost)
         if cost < min_cost:
             new_aff = aff2
             min_cost = cost
     new_move = [np.dot((j - mean_moving), new_aff) + mean_static for j in moving]
-    #print(min_cost)
+    print(min_cost)
     del new_moving
     del min_cost
     del pca
@@ -286,6 +286,7 @@ def plot_process(static,moving):
     plt.title("Round "+str(counter)+"\nDistance: "+str(round(costs[counter][0]))+
               "  |  Link: "+str(round(costs[counter][1])))
     plt.legend(['Distance','Link'])
+    plt.grid()
     plt.show()
     plt.close()
     
@@ -304,6 +305,8 @@ def plot_process(static,moving):
 def dist_new(x0,static,moving,points,lnk_cost_before,max_dist,lam):
     x0 = np.reshape(x0,(points,7))
     # ToDo this must be global variable
+    #lnk_after1 = link_cost(moving)
+    np.save('out/dist_link11.npy',x0)
     moving = transform(x0,moving)
     
     con_static = np.concatenate(static)
@@ -313,8 +316,12 @@ def dist_new(x0,static,moving,points,lnk_cost_before,max_dist,lam):
     dist_cost = kd_tree_cost(con_static,con_moving,max_dist)
     
     '''Linkage cost'''
+    #lnk_after = link_cost(moving)
+    #print(lnk_after,lnk_after1,lnk_cost_before)
+    #print(x0)
     lnk_cost=np.linalg.norm(link_cost(moving)-lnk_cost_before)*lam
     costs.append([dist_cost,lnk_cost])
+    np.save('out/costs11.npy',costs)
     plot_process(static,moving)
     cost = dist_cost+lnk_cost
     return cost

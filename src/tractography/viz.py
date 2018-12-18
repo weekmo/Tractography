@@ -48,5 +48,22 @@ def clusters_colors(bundle, colours, labels):
         clustered_bundle.append(data_line)
     return clustered_bundle
 
+def lines_colors(bundle, colours, idx):
+    coloured_lines = []
+    for i in range(len(bundle)):
+        lines=[]
+        colours_list = []
+        for j in range(len(idx[i])-1):
+            #print("new colour",j)
+            for k in range(idx[i][j],idx[i][j+1]-1):
+                lines.append([k,k+1])
+                colours_list.append(colours[j])
+        data_line = LineSet()
+        data_line.points = Vector3dVector(bundle[i])
+        data_line.lines = Vector2iVector(lines)
+        data_line.colors = Vector3dVector(colours_list)
+        coloured_lines.append(data_line)
+    return coloured_lines
+
 def draw_clusters(clusters):
     draw_geometries(np.hstack(clusters))
