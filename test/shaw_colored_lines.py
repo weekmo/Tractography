@@ -9,6 +9,9 @@ import numpy as np
 #import matplotlib.pyplot as plt
 
 from sklearn.cluster import KMeans
+from sklearn.neighbors import KDTree
+
+from dipy.tracking.streamline import set_number_of_points
 
 from src.tractography.viz import clusters_colors,draw_clusters,lines_colors
 from src.tractography.io import read_ply
