@@ -22,7 +22,7 @@ from dipy.core.optimize import Optimizer
 #from dipy.align.streamlinear import compose_matrix44
 
 from src.tractography.io import read_ply
-from src.tractography.viz import draw_bundles
+#from src.tractography.viz import draw_bundles
 from src.tractography.Utils import costs, transform,dist_new,pca_transform_norm, link_cost
 
 

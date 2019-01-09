@@ -1,37 +1,49 @@
 import numpy as np
-from scipy.sparse import csc_matrix
+from sklearn.neighbors import KDTree
+from sklearn.cluster import KMeans
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import lsqr
-from dipy.tracking.streamline import set_number_of_points
+#from dipy.tracking.streamline import set_number_of_points
 from src.tractography.io import read_ply
+from src.tractography.viz import draw_bundles
 
-bundle= read_ply('../data/150019/m_ex_atr-right_shore.ply')
-bundle = set_number_of_points(bundle,20)
+static = read_ply('data/132118/m_ex_atr-right_shore.ply')
+moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
 
-d = bundle[0]
-len_d = len(d)
+con_static = np.concatenate(static)
+con_moving = np.concatenate(moving)
 
-dim = []
-j=0
-for i in range(len_d):
-    for _ in range(3):
-        dim.append([i,j])
-        j+=1
+num = 30
+static_clusters = KMeans(n_clusters=num).fit(con_static)
+moving_clusters = KMeans(n_clusters=num).fit(con_moving)
 
-dim=np.array(dim)
-shape=(len_d,len_d*3)
-D = coo_matrix((np.concatenate(d),(dim[:,0],dim[:,1])),shape=shape).tocsr()
+static_centers = static_clusters.cluster_centers_
+moving_centers = moving_clusters.cluster_centers_
 
-u = bundle[180]
+kdtree = KDTree(moving_centers)
+distances,ids = kdtree.query(con_moving,k=num)
+distances[distances==0]=1 #centroid distance must be 1
+distances=1/distances  #heigh value for close verteces
+# distances = np.divide(distances,distances.sum(axis=1).reshape((distances.shape[0],1)))
+weights = distances[:,0]/distances.sum(axis=1) #The weigh is 
 
-x = lsqr(D.T,np.concatenate(u))[0]
-print(x)
 
-print(D.shape)
-print(np.concatenate(u).shape)
+new_moving_centers = np.ones((num,4))
+new_moving_centers[:,:-1] = static_centers
 
-A = csc_matrix([[1., 0.], [1., 1.], [0., 1.]], dtype=float)
+D = coo_matrix((np.concatenate(new_moving_centers),
+                (np.repeat(np.arange(num),4),np.arange(num*4))),
+                (num,num*4)).tocsr()
 
-b = np.array([0., 0., 0.], dtype=float)
-print(A.shape)
-print(b.shape)
+WD = np.dot(weights,D)
+
+
+tract = np.array([lsqr(WD,moving_centers[:,0])[0],
+                   lsqr(WD,moving_centers[:,1])[0],
+                   lsqr(WD,moving_centers[:,2])[0]]).T
+
+
+result = D.dot(tract)
+
+
+
