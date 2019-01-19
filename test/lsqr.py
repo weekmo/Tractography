@@ -71,4 +71,4 @@ def transform(affine,bundle,clusters_centers):
 
 new_moving = transform(x,moving,moving_centers)
 
-draw_bundles([static,moving,new_moving],[[1,0,0],[0,0,1],[0,1,0]])
+draw_bundles([static,moving])
