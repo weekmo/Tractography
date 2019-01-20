@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy import sparse
+from scipy.sparse.linalg import lsqr
 from sklearn.neighbors import KDTree
-lsqr = sparse.linalg.lsqr
 
 from src.tractography.io import read_ply
 
@@ -17,6 +17,7 @@ con_moving = np.concatenate(moving)
 ''' Vars '''
 length = len(con_moving)
 threshold=.9
+alpha = 1
 lamb = 1
 ''' Build KDTree '''
 kdtree = KDTree(con_static)
@@ -39,19 +40,38 @@ new_con_moving[:,:-1] = con_moving
 D = sparse.coo_matrix((np.concatenate(new_con_moving),
                 (np.repeat(np.arange(length),4),np.arange(length*4))),
                 (length,length*4)).tocsr()
-
+''' Get WD '''
 WD = W.dot(D)
+''' Get U '''
+# U = con_static[ids]
+''' Get WD '''
+WU = W.dot(con_static[ids])
 
-U = con_static[ids]
-WU = W.dot(U)
-print(WU)
+''' Stiffnes '''
+length = con_moving.shape[0]-len(moving)
+data = np.tile([-1,1],length)
+row = np.arange(length).repeat(2)
 
+col=[]
+j=0
+for track in moving:
+    end = j+track.shape[0]
+    col.append(np.arange(j,end).repeat(2)[1:-1])
+    j = end
+col = np.concatenate(col)
 
-X = np.array([lsqr(WD,WU[:,0])[0],
-                   lsqr(D,WU[:,1])[0],
-                   lsqr(D,WU[:,2])[0]]).T
+M = sparse.csr_matrix((data,(row,col)),(length,con_moving.shape[0]))
 
-x0 = X[:4,:].T
-x1 = x0[:,:-1]
+''' Get G '''
+# G = sparse.diags([1,1,1,lamb])
+MG = sparse.kron(M,sparse.diags([1,1,1,lamb])).tocsr()
+''' Get Zeros '''
+zer = np.zeros((MG.shape[0],3))
 
-v1 = np.dot(con_moving[0],x1)
+A = sparse.vstack([MG,WD])
+B = np.vstack([zer,WU])
+''' --------------------- '''
+
+X = np.array([lsqr(A,B[:,0])[0],
+                   lsqr(A,B[:,1])[0],
+                   lsqr(A,B[:,2])[0]]).T
