@@ -203,7 +203,7 @@ def distance_tract_clustering_medoids(x0, static, moving, k_medoids, beta, max_d
     costs.append(cost)
     return cost 
     
-def pca_transform_norm(static, moving, max_dist):
+def pca_transform_norm(static, moving, max_dist=50):
     
     con_static = np.concatenate(static)
     con_moving = np.concatenate(moving)
