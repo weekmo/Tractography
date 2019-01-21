@@ -43,8 +43,8 @@ plt.savefig('new_plan/dist_after_PCA.png', dpi=600)
 
 ''' Vars '''
 length = len(con_moving)
-threshold=.4
-alpha = 1
+threshold=.6
+alpha = 6
 lamb = 1
 
 ''' Get Distances and indeces for closest points '''
@@ -52,14 +52,16 @@ dist,ids = kdtree.query(con_moving,k=1)
 dist = np.concatenate(dist)
 ids = np.concatenate(ids)
 ''' Get w by applying the threshold '''
-# w = np.where(dist<threshold,0,1)
+W = np.where(dist>threshold,0,1)
+count = np.unique(W,return_counts=True)
+print(count)
+print('Points used:',count[1]/count[1].sum())
+
 ''' Make w diagonal '''
-# W = sparse.diags(w)
-'''
-x =np.where(dist<threshold,0,1)
-print(np.unique(x,return_counts=True))
-'''
-W = sparse.diags(np.where(dist<threshold,0,1))
+W = sparse.diags(W)
+
+
+# W = sparse.diags(np.where(dist<threshold,0,1))
 # I = sparse.identity(3)
 # K = sparse.kron(W,I)
 ''' Moving in homogeneouse coordinates '''
