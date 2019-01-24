@@ -14,7 +14,8 @@ from src.tractography.Utils import pca_transform_norm
 from src.tractography.viz import draw_bundles
 
 
-static = read_ply('data/132118/m_ex_atr-right_shore.ply')
+#static = read_ply('data/132118/m_ex_atr-right_shore.ply')
+static = read_ply('data/132118/m_ex_atr-left_shore.ply')
 moving = read_ply('data/150019/m_ex_atr-right_shore.ply')
 
 ''' Get points cloud '''
@@ -29,7 +30,7 @@ plt.hist(kdtree.query(con_moving,k=1)[0], bins='auto')
 plt.title("Distance before PCA")
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
-plt.savefig('new_plan/dist_before_PCA.png', dpi=600)
+plt.savefig('new_plan/dist_before_PCA1.png', dpi=600)
 
 ''' Apply PCA '''
 con_moving = np.concatenate(pca_transform_norm(static,moving))
@@ -39,12 +40,18 @@ plt.hist(kdtree.query(con_moving,k=1)[0], bins='auto')
 plt.title("Distance after PCA")
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
-plt.savefig('new_plan/dist_after_PCA.png', dpi=600)
+plt.savefig('new_plan/dist_after_PCA1.png', dpi=600)
 
 ''' Vars '''
+# 6 | 99999
+# 5 | 99999
+# 4 | 99999
+# 3 | 99999
+# 3 | 999
+# 2 | 999
 length = len(con_moving)
-threshold=.6
-alpha = 6
+threshold=6
+alpha = 99999
 lamb = 1
 
 ''' Get Distances and indeces for closest points '''
@@ -108,7 +115,7 @@ X = np.array([lsqr(A,B[:,0])[0],
                    lsqr(A,B[:,2])[0]]).T
 end = time()
 
-np.save('new_plan/x0.npy',X)
+np.save('new_plan/x1.npy',X)
 
 hours = int((end-start)/3600)
 minutes = int(((end-start)%3600)/60)
@@ -126,5 +133,4 @@ for track in moving:
     #new_moving.append([i,end])
     i = end
     
-draw_bundles([moving, new_moving])
-
+draw_bundles([new_moving,static])
