@@ -13,15 +13,15 @@ from src.tractography.io import read_ply
 from src.tractography.Utils import pca_transform_norm
 from src.tractography.viz import draw_bundles
 
-num = 3
+num = 4
 
-static = read_ply('data/197348/m_ex_cc-body-left_shore.ply') #02
+static = read_ply('data/150019/m_ex_cst-right_shore.ply') #02
 #draw_bundles([static])
-# static = read_ply('data/132118/m_ex_atr-left_shore.ply') 
-moving = read_ply('data/150019/m_ex_cc-body-left_shore.ply') #00
-# moving = read_ply('data/150019/m_ex_atr-left_shore.ply') #01
+# static = read_ply('data/132118/m_ex_cing-left_shore.ply') 
+moving = read_ply('data/150019/m_ex_cst-left_shore.ply') #00
+# moving = read_ply('data/150019/m_ex_cst-left_shore.ply') #01
 draw_bundles([moving,static],[[0,0,1],[1,0,0]])
-
+              
 ''' Get points cloud '''
 con_static = np.concatenate(static)
 con_moving = np.concatenate(moving)
@@ -58,7 +58,7 @@ plt.savefig('new_plan/{:02d}1_hist_PCA.png'.format(num), dpi=600)
 # 3 | 999
 # 2 | 999
 length = len(con_moving)
-threshold=7
+threshold=10
 alpha = 99999
 lamb = 1
 
@@ -140,13 +140,13 @@ for track in moving:
     new_moving.append(new_con_mov[i:end])
     #new_moving.append([i,end])
     i = end
+    
 # bins='auto'
-
 ''' Get the threshold '''
 plt.hist(kdtree.query(new_con_mov,k=1)[0], bins='auto',range=(0,max_range))
-plt.title("After ICP\nMax distance: "+
+plt.title("After ICP | Duration: 05:20:47\nMax distance: "+
           str(threshold)+"mm, alpha: "+str(alpha)+", Points used: "+
-          str(np.round(count[1][1]/count[1].sum(),4)*100)+"%")
+          str(np.round(count[1][1]/count[1].sum()*100,2))+"%")
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
 plt.savefig('new_plan/{:02d}2_hist_ICP.png'.format(num), dpi=600)
