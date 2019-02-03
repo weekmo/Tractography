@@ -16,7 +16,7 @@ from src.tractography.Utils import pca_transform
 def fake_registration():
     mat = compose_matrix44([50, 20, 20, 180, 90, 90])
     target = read_ply('../data/132118/m_ex_atr-left_shore.ply')
-    subject = transform_streamlines(target, mat)
+    subject = transform_streamlines(moving, mat)
 
     subject_after_registration, _ = register(target, subject)
 

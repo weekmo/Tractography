@@ -12,13 +12,12 @@ import matplotlib.pyplot as plt
 from src.tractography.io import read_ply
 from src.tractography.Utils import pca_transform_norm
 from src.tractography.viz import draw_bundles
+num = 6
 
-num = 4
-
-static = read_ply('data/150019/m_ex_cst-right_shore.ply') #02
+static = read_ply('data/197348/m_ex_atr-left_shore.ply') #02
 #draw_bundles([static])
 # static = read_ply('data/132118/m_ex_cing-left_shore.ply') 
-moving = read_ply('data/150019/m_ex_cst-left_shore.ply') #00
+moving = read_ply('data/197348/m_ex_atr-right_shore.ply') #00
 # moving = read_ply('data/150019/m_ex_cst-left_shore.ply') #01
 draw_bundles([moving,static],[[0,0,1],[1,0,0]])
               
@@ -28,24 +27,25 @@ con_moving = np.concatenate(moving)
 print(np.count_nonzero(con_moving))
 ''' Build KDTree '''
 kdtree = KDTree(con_static)
-disatnces = kdtree.query(con_moving,k=1)[0]
+distances = kdtree.query(con_moving,k=1)[0]
 
 ''' Get the threshold '''
-max_range = max(disatnces)
-plt.hist(disatnces, bins='auto',range=(0,max_range))
-plt.title("Original Position")
+max_range = max(distances)
+plt.hist(distances, bins='auto',range=(0,max_range))
+plt.title("Original Position\nTotal distance: {:2f}".format(distances.sum()))
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
 plt.savefig('new_plan/{:02d}0_hist_original.png'.format(num), dpi=600)
 
 ''' Apply PCA '''
-PCA_moving = pca_transform_norm(static, moving, best=False)
+PCA_moving = pca_transform_norm(static, moving, best=True)
 con_moving = np.concatenate(PCA_moving)
 draw_bundles([PCA_moving,static],[[0,0,1],[1,0,0]])
 
 ''' Get the threshold '''
-plt.hist(kdtree.query(con_moving,k=1)[0], bins='auto', range=(0,max_range))
-plt.title("After PCA")
+distances = kdtree.query(con_moving,k=1)[0]
+plt.hist(distances, bins='auto', range=(0,max_range))
+plt.title("After PCA\nTotal distance: {:2f}".format(distances.sum()))
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
 plt.savefig('new_plan/{:02d}1_hist_PCA.png'.format(num), dpi=600)
@@ -58,8 +58,8 @@ plt.savefig('new_plan/{:02d}1_hist_PCA.png'.format(num), dpi=600)
 # 3 | 999
 # 2 | 999
 length = len(con_moving)
-threshold=10
-alpha = 99999
+threshold=7
+alpha = 999999
 lamb = 1
 
 ''' Get Distances and indeces for closest points '''
@@ -70,7 +70,7 @@ ids = np.concatenate(ids)
 W = np.where(dist>threshold,0,1)
 count = np.unique(W,return_counts=True)
 print(count)
-print('Points used:',np.round(count[1][1]/count[1].sum(),4)*100,'%')
+print('Points used:',"{:.1%}".format(count[1][1]/count[1].sum()))
 
 ''' Make w diagonal '''
 W = sparse.diags(W)
@@ -117,11 +117,21 @@ zer = np.zeros((MG.shape[0],3))
 A = sparse.vstack([MG,WD])
 B = np.vstack([zer,WU])
 
+X = np.zeros((A.shape[1],3))
+acon = np.zeros((3))
+
 start = time()
-X = np.array([lsqr(A,B[:,0])[0],
-                   lsqr(A,B[:,1])[0],
-                   lsqr(A,B[:,2])[0]]).T
+for i in range(3):
+    result = np.array(lsqr(A,B[:,i]))
+    X[:,i] = result[0]
+    acon[i] = result[6]
+    print(result[1:-1])
 end = time()
+print(acon)
+
+'''    
+X = np.array([lsqr(A,B[:,0])[0,6],lsqr(A,B[:,1])[0,6],lsqr(A,B[:,2])[0,6]]).T
+'''
 
 np.save('new_plan/{:02d}_x.npy'.format(num),X)
 
@@ -144,9 +154,9 @@ for track in moving:
 # bins='auto'
 ''' Get the threshold '''
 plt.hist(kdtree.query(new_con_mov,k=1)[0], bins='auto',range=(0,max_range))
-plt.title("After ICP | Duration: 05:20:47\nMax distance: "+
+plt.title("After ICP | Duration: {:02}:{:02}:{:02}\nMax distance: ".format(hours,minutes,seconds)+
           str(threshold)+"mm, alpha: "+str(alpha)+", Points used: "+
-          str(np.round(count[1][1]/count[1].sum()*100,2))+"%")
+          "{:.1%}".format(count[1][1]/count[1].sum()))
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
 plt.savefig('new_plan/{:02d}2_hist_ICP.png'.format(num), dpi=600)

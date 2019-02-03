@@ -15,7 +15,6 @@ from dipy.tracking.streamline import set_number_of_points
 
 from src.tractography.viz import clusters_colors,draw_clusters,lines_colors
 from src.tractography.io import read_ply
-from src.tractography.Utils import transform
 
 moving = read_ply('data/150019/m_ex_atr-left_shore.ply')
 

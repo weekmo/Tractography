@@ -65,5 +65,16 @@ def lines_colors(bundle, colours, idx):
         coloured_lines.append(data_line)
     return coloured_lines
 
+def isomap_lines_colors(bundle, colours):
+    coloured_lines = []
+    for i,points in enumerate(bundle):
+        lines = [[j, j + 1] for j in range(len(points) - 1)]
+        data_line = LineSet()
+        data_line.points = Vector3dVector(bundle[i])
+        data_line.lines = Vector2iVector(lines)
+        data_line.colors = Vector3dVector(colours[i])
+        coloured_lines.append(data_line)
+    return coloured_lines
+
 def draw_clusters(clusters):
     draw_geometries(np.hstack(clusters))
