@@ -53,15 +53,3 @@ draw_clusters([colored_bundle])
 print(iso_stat[-5:])
 print(pca_stat[-5:])
 '''
-'''
-1- dipy
-2- Non-linear optimizer
-3- Non rigid ICP
-
- --- Eval ---
- left to right
- 1- Distances
- 2- Visually
- 3- local and global deformation
- x- effect on Co Bundle Map
-'''
