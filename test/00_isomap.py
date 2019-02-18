@@ -47,6 +47,7 @@ for track in static:
     colors.append(iso_stat2[i:end-1])
     #new_moving.append([i,end])
     i = end
+    
 colored_bundle = isomap_lines_colors(static,colors)
 draw_clusters([colored_bundle])
 '''

@@ -7,7 +7,7 @@ from dipy.tracking.streamline import transform_streamlines,set_number_of_points
 from dipy.align.streamlinear import compose_matrix44
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
 
 from sklearn.neighbors import KDTree
 from sklearn.decomposition import PCA
@@ -103,7 +103,7 @@ def distance_pc(x0, static, moving, beta, max_dist):
     affine = compose_matrix44(x0)
     moving = transform_streamlines(moving, affine)
     cost = kd_tree_cost(np.concatenate(static), np.concatenate(moving), max_dist) * beta
-    costs.append(cost)
+    #costs.append(cost)
     return cost
 
 

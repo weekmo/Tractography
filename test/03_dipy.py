@@ -19,12 +19,12 @@ from src.tractography.viz import draw_bundles
 static = read_ply('data/197348/m_ex_atr-left_shore.ply') 
 moving = read_ply('data/197348/m_ex_atr-right_shore.ply')
 
-#con_static = np.concatenate(static)
-con_static = np.concatenate(subject)
+con_static = np.concatenate(static)
+#con_static = np.concatenate(subject)
 con_moving = np.concatenate(moving)
 
 start = time()
-new_moving = register(subject,moving)
+new_moving = register(static,moving)
 end = time()
 
 kdtree = KDTree(con_static)
@@ -37,11 +37,11 @@ print("Duration: {:02}:{:02}:{:02}".format(hours,minutes,seconds))
 print("Total distance: {:2f}".format(distances.sum()))
 
 #max_range = max(distances)
-plt.hist(distances, bins='auto',range=(0,20))
-plt.title("dipy | Duration: {:02}:{:02}:{:02}\nTotal Distance: {:2d}"
-          .format(hours,minutes,seconds,np.sum(distances)))
+plt.hist(distances, bins='auto',range=(0,max_range))
+plt.title("dipy | Duration: {:02}:{:02}:{:02}\nTotal Distance: {:}"
+          .format(hours,minutes,seconds,round(distances.sum(),2)))
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
-plt.savefig('new_plan/{:02d}0_dipy_hist_original.png'.format(num), dpi=600)
+plt.savefig('new_plan/{:02d}0_dipy_hist.png'.format(num), dpi=600)
 
-draw_bundles([new_moving,subject],[[0,0,1],[1,0,0]])
+draw_bundles([moving,static],[[0,0,1],[1,0,0]])

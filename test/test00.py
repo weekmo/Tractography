@@ -30,7 +30,7 @@ from src.tractography.Utils import costs, transform,dist_new,pca_transform_norm,
 static = read_ply('data/132118/m_ex_atr-left_shore.ply')
 moving = read_ply('data/150019/m_ex_atr-left_shore.ply')
 
-pca_moving = pca_transform_norm(static,moving,5000)
+pca_moving = pca_transform_norm(static,moving)
 
 length = 5
 x0 = np.array([[0,0,0, 0,0,0, 1] for _ in range(length)])

@@ -43,7 +43,7 @@ distances = kdtree.query(con_moving,k=1)[0]
 ''' Get the threshold '''
 max_range = max(distances)
 plt.hist(distances, bins='auto',range=(0,max_range))
-plt.title("Original Position\nTotal distance: {:2f}".format(distances.sum()))
+plt.title("Original Position\nTotal distance: {:}".format(round(distances.sum(),2)))
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
 plt.savefig('new_plan/{:02d}0_hist_original.png'.format(num), dpi=600)
@@ -164,13 +164,14 @@ for track in moving:
     
 # bins='auto'
 ''' Get the threshold '''
-plt.hist(kdtree.query(new_con_mov,k=1)[0], bins='auto',range=(0,max_range))
-plt.title("After ICP | Duration: {:02}:{:02}:{:02}\nMax distance: ".format(hours,minutes,seconds)+
-          str(threshold)+"mm, alpha: "+str(alpha)+", Points used: "+
+distances = kdtree.query(new_con_mov,k=1)[0]
+plt.hist(distances, bins='auto',range=(0,max_range))
+plt.title("After ICP | Duration: {:02}:{:02}:{:02}, Total Distance: {:}"
+          .format(hours,minutes,seconds,round(distances.sum(),2))+
+          "\nMax distance: "+str(threshold)+"mm, alpha: "+str(alpha)+", Points used: "+
           "{:.1%}".format(count[1][1]/count[1].sum()))
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
 plt.savefig('new_plan/{:02d}2_hist_ICP.png'.format(num), dpi=600)
-
 
 draw_bundles([new_moving,static],[[0,0,1],[1,0,0]])
