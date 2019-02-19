@@ -12,12 +12,17 @@ from sklearn.neighbors import KDTree
 
 import matplotlib.pyplot as plt
 
+from dipy.tracking.streamline import transform_streamlines
+
 from src.tractography.io import read_ply
 from src.tractography.registration import register
 from src.tractography.viz import draw_bundles
 
-static = read_ply('data/197348/m_ex_atr-left_shore.ply') 
-moving = read_ply('data/197348/m_ex_atr-right_shore.ply')
+static = read_ply('data/132118/m_ex_atr-left_shore.ply') 
+moving = read_ply('data/132118/m_ex_atr-right_shore.ply')
+
+mat = np.array([[-1,0,0,0],[0,1,0,0],[0,0,1,0],[1,1,1,1]])
+moving = transform_streamlines(moving,mat)
 
 con_static = np.concatenate(static)
 #con_static = np.concatenate(subject)
@@ -44,4 +49,4 @@ plt.ylabel("Frequncy")
 plt.xlabel("Distance")
 plt.savefig('new_plan/{:02d}0_dipy_hist.png'.format(num), dpi=600)
 
-draw_bundles([moving,static],[[0,0,1],[1,0,0]])
+draw_bundles([new_moving,static],[[0,0,1],[1,0,0]])

@@ -23,12 +23,12 @@ import matplotlib.pyplot as plt
 from src.tractography.io import read_ply
 from src.tractography.Utils import pca_transform_norm
 from src.tractography.viz import draw_bundles
-num = 6
+num = 8
 
-static = read_ply('data/197348/m_ex_atr-left_shore.ply') #02
+static = read_ply('data/132118/m_ex_atr-left_shore.ply') #02
 #draw_bundles([static])
 # static = read_ply('data/132118/m_ex_cing-left_shore.ply') 
-moving = read_ply('data/197348/m_ex_atr-right_shore.ply') #00
+moving = read_ply('data/132118/m_ex_atr-right_shore.ply') #00
 # moving = read_ply('data/150019/m_ex_cst-left_shore.ply') #01
 draw_bundles([moving,static],[[0,0,1],[1,0,0]])
               
@@ -69,7 +69,7 @@ plt.savefig('new_plan/{:02d}1_hist_PCA.png'.format(num), dpi=600)
 # 3 | 999
 # 2 | 999
 length = len(con_moving)
-threshold=7
+threshold=10
 alpha = 999999
 lamb = 1
 

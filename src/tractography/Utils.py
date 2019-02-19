@@ -328,3 +328,7 @@ def dist_new(x0,static,moving,points,lnk_cost_before,max_dist,lam):
     plot_process(static,moving)
     cost = dist_cost+lnk_cost
     return cost
+
+def flip(bundle,x=1,z=1,y=1):
+    mat = np.array([[x,0,0,0],[0,y,0,0],[0,0,z,0],[1,1,1,1]])
+    return transform_streamlines(bundle,mat)
