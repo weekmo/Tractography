@@ -15,21 +15,28 @@ import matplotlib.pyplot as plt
 from dipy.tracking.streamline import transform_streamlines
 
 from src.tractography.io import read_ply
+from src.tractography.Utils import pca_transform_norm,flip
 from src.tractography.registration import register
 from src.tractography.viz import draw_bundles
 
-static = read_ply('data/132118/m_ex_atr-left_shore.ply') 
-moving = read_ply('data/132118/m_ex_atr-right_shore.ply')
+static = read_ply('data/197348/m_ex_atr-left_shore.ply') 
+moving = read_ply('data/197348/m_ex_atr-right_shore.ply')
 
-mat = np.array([[-1,0,0,0],[0,1,0,0],[0,0,1,0],[1,1,1,1]])
-moving = transform_streamlines(moving,mat)
+''' Apply PCA '''
+pre_moving = pca_transform_norm(static, moving, best=True)
+draw_bundles([pre_moving,static],[[0,0,1],[1,0,0]])
+
+''' Flip '''
+'''
+pre_moving = flip(moving,x=-1)
+draw_bundles([pre_moving,static],[[0,0,1],[1,0,0]])
+'''
 
 con_static = np.concatenate(static)
-#con_static = np.concatenate(subject)
-con_moving = np.concatenate(moving)
+con_moving = np.concatenate(pre_moving)
 
 start = time()
-new_moving = register(static,moving)
+new_moving = register(static,pre_moving)
 end = time()
 
 kdtree = KDTree(con_static)
@@ -47,6 +54,6 @@ plt.title("dipy | Duration: {:02}:{:02}:{:02}\nTotal Distance: {:}"
           .format(hours,minutes,seconds,round(distances.sum(),2)))
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
-plt.savefig('new_plan/{:02d}0_dipy_hist.png'.format(num), dpi=600)
+plt.savefig('new_plan/1{:02d}_dipy_hist.png'.format(num), dpi=600)
 
 draw_bundles([new_moving,static],[[0,0,1],[1,0,0]])
