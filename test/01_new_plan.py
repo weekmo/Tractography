@@ -24,14 +24,12 @@ from src.tractography.io import read_ply
 from src.tractography.Utils import pca_transform_norm
 from src.tractography.viz import draw_bundles
 
-
-num = 2
+num = 9
 
 static = read_ply('data/197348/m_ex_atr-left_shore.ply')
 moving = read_ply('data/197348/m_ex_atr-right_shore.ply')
 
 draw_bundles([moving,static],[[0,0,1],[1,0,0]])
-
 
 ''' Get points cloud '''
 con_static = np.concatenate(static)
