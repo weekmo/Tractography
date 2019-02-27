@@ -129,7 +129,7 @@ for i in range(3):
     acon[i] = result[6]
     #print(result[1:-1])
 end = time()
-print(acon)
+print(np.average(acon))
 
 '''    
 X = np.array([lsqr(A,B[:,0])[0,6],lsqr(A,B[:,1])[0,6],lsqr(A,B[:,2])[0,6]]).T
