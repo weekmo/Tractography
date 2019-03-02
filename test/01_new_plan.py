@@ -24,7 +24,7 @@ from src.tractography.io import read_ply
 from src.tractography.Utils import pca_transform_norm
 from src.tractography.viz import draw_bundles
 
-num = 9
+num = 11
 
 static = read_ply('data/197348/m_ex_atr-left_shore.ply')
 moving = read_ply('data/197348/m_ex_atr-right_shore.ply')
@@ -42,8 +42,8 @@ distances = kdtree.query(con_moving,k=1)[0]
 ''' Get the threshold '''
 max_range = max(distances)
 plt.hist(distances, bins='auto',range=(0,max_range))
-plt.title("Original Position\nTotal distance: {:}".format(round(distances.sum(),2)))
-plt.ylabel("Frequncy")
+#plt.title("Original Position\nTotal distance: {:}".format(round(distances.sum(),2)))
+plt.ylabel("Frequency")
 plt.xlabel("Distance")
 plt.savefig('new_plan/1{:02d}_hist_original.png'.format(num), dpi=600)
 
@@ -62,8 +62,8 @@ draw_bundles([pre_moving,static],[[0,0,1],[1,0,0]])
 ''' Get the threshold '''
 distances = kdtree.query(con_moving,k=1)[0]
 plt.hist(distances, bins='auto', range=(0,max_range))
-plt.title("After PCA\nTotal distance: {:2f}".format(distances.sum()))
-plt.ylabel("Frequncy")
+#plt.title("After PCA\nTotal distance: {:2f}".format(distances.sum()))
+plt.ylabel("Frequency")
 plt.xlabel("Distance")
 plt.savefig('new_plan/1{:02d}_hist_PCA.png'.format(num), dpi=600)
 
@@ -76,7 +76,7 @@ plt.savefig('new_plan/1{:02d}_hist_PCA.png'.format(num), dpi=600)
 # 2 | 999
 length = len(con_moving)
 threshold=7
-alpha = 999999
+alpha = 9999
 lamb = 1
 
 ''' Get Distances and indeces for closest points '''
@@ -172,11 +172,11 @@ for track in moving:
 ''' Get the threshold '''
 distances = kdtree.query(new_con_mov,k=1)[0]
 plt.hist(distances, bins='auto',range=(0,max_range))
-plt.title("After ICP | Duration: {:02}:{:02}:{:02}, Total Distance: {:}"
-          .format(hours,minutes,seconds,round(distances.sum(),2))+
-          "\nMax distance: "+str(threshold)+"mm, alpha: "+str(alpha)+", Points used: "+
-          "{:.1%}".format(count[1][1]/count[1].sum()))
-plt.ylabel("Frequncy")
+#plt.title("After ICP | Duration: {:02}:{:02}:{:02}, Total Distance: {:}"
+#          .format(hours,minutes,seconds,round(distances.sum(),2))+
+#          "\nMax distance: "+str(threshold)+"mm, alpha: "+str(alpha)+", Points used: "+
+#          "{:.1%}".format(count[1][1]/count[1].sum()))
+plt.ylabel("Frequency")
 plt.xlabel("Distance")
-plt.savefig('new_plan/1{:02d}_hist_ICP.png'.format(num), dpi=600)
+plt.savefig('new_plan/1{:02d}_hist_ICP2.png'.format(num), dpi=600)
 draw_bundles([new_moving,static],[[0,0,1],[1,0,0]])

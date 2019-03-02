@@ -61,8 +61,8 @@ distances = np.linalg.norm(con_static-con_moving,axis=1)
 ''' Get the threshold '''
 max_range = max(distances)
 plt.hist(distances, bins='auto',range=(0,max_range))
-plt.title("Original Position\nTotal distance: {:}".format(round(distances.sum(),2)))
-plt.ylabel("Frequncy")
+#plt.title("Original Position\nTotal distance: {:}".format(round(distances.sum(),2)))
+plt.ylabel("Frequency")
 plt.xlabel("Distance")
 plt.savefig('new_plan/1{:02d}_hist_original.png'.format(num), dpi=600)
 
@@ -127,7 +127,7 @@ for i in range(3):
     result = np.array(lsqr(A,B[:,i]))
     X[:,i] = result[0]
     acon[i] = result[6]
-    #print(result[1:-1])
+    print(result[1:-1])
 end = time()
 print(np.average(acon))
 
@@ -157,10 +157,10 @@ for track in moving:
 ''' Get the threshold '''
 distances = np.linalg.norm(con_static-new_con_mov,axis=1)
 plt.hist(distances, bins='auto')
-plt.title("After ICP | Duration: {:02}:{:02}:{:02}, Total Distance: {:}"
-          .format(hours,minutes,seconds,round(distances.sum(),2))+
-          "\nMax distance: "+str(threshold)+"mm, alpha: "+str(alpha))
-plt.ylabel("Frequncy")
+#plt.title("After ICP | Duration: {:02}:{:02}:{:02}, Total Distance: {:}"
+#          .format(hours,minutes,seconds,round(distances.sum(),2))+
+#          "\nMax distance: "+str(threshold)+"mm, alpha: "+str(alpha))
+plt.ylabel("Frequency")
 plt.xlabel("Distance")
 plt.savefig('new_plan/1{:02d}_hist_ICP.png'.format(num), dpi=600)
 
@@ -176,9 +176,9 @@ draw_bundles([dipy_moving,moving],[[0,0,1],[1,0,0]])
 ''' Plot the distance '''
 distances = np.linalg.norm(con_moving-np.concatenate(dipy_moving),axis=1)
 plt.hist(distances, bins='auto')
-plt.title("dypi | Duration: {:02}:{:02}:{:02}, Total Distance: {:}"
-          .format(hours,minutes,seconds,round(distances.sum(),2))+
-          "\nMax distance: "+str(threshold)+"mm, alpha: "+str(alpha))
-plt.ylabel("Frequncy")
+#plt.title("dypi | Duration: {:02}:{:02}:{:02}, Total Distance: {:}"
+#          .format(hours,minutes,seconds,round(distances.sum(),2))+
+#          "\nMax distance: "+str(threshold)+"mm, alpha: "+str(alpha))
+plt.ylabel("Frequency")
 plt.xlabel("Distance")
 plt.savefig('new_plan/1{:02d}_hist_dipy.png'.format(num), dpi=600)

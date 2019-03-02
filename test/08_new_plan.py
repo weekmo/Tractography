@@ -24,7 +24,7 @@ from sklearn.neighbors import KDTree
 import matplotlib.pyplot as plt
 
 from src.tractography.io import read_ply
-from src.tractography.Utils import pca_transform_norm, flip
+from src.tractography.Utils import pca_transform_norm
 from src.tractography.viz import draw_bundles
 
 data_path = 'data/132118/'
