@@ -1,3 +1,5 @@
+new_plan/
+filtered/
 build/
 dist/
 *.egg*

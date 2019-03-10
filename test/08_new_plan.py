@@ -30,15 +30,13 @@ from src.tractography.viz import draw_bundles
 data_path = 'data/132118/'
 pathways = [data_path+fiber for fiber in listdir(data_path) if isfile(data_path+fiber)]
 
-num = 12
-
-print(pathways[num])
-print(pathways[num+1])
-
-static = read_ply(pathways[num])
-moving = read_ply(pathways[num+1])
-
+i=16
+print(pathways[i])
+print(pathways[i+1])
+static = read_ply(pathways[i])
+moving = read_ply(pathways[i+1])
 draw_bundles([moving,static],[[0,0,1],[1,0,0]])
+    
 #moving = new_moving
 ''' Get points cloud '''
 con_static = np.concatenate(static)
@@ -50,17 +48,18 @@ distances = kdtree.query(con_moving,k=1)[0]
 
 ''' Get the threshold '''
 max_range = max(distances)
+'''
 plt.hist(distances, bins='auto',range=(0,max_range))
 plt.title("Original Position\nTotal distance: {:}".format(round(distances.sum(),2)))
 plt.ylabel("Frequency")
 plt.xlabel("Distance")
-plt.savefig('new_plan/2{:02d}_hist_original.png'.format(num), dpi=600)
-
+plt.savefig('new_plan/2{:02d}_hist_original.png'.format(i), dpi=600)
+'''
 ''' Apply PCA '''
 
 pre_moving = pca_transform_norm(static, moving, best=True)
 con_moving = np.concatenate(pre_moving)
-draw_bundles([pre_moving,static],[[0,0,1],[1,0,0]])
+#draw_bundles([pre_moving,static],[[0,0,1],[1,0,0]])
 
 
 ''' Flip '''
@@ -71,12 +70,15 @@ draw_bundles([pre_moving,static],[[0,0,1],[1,0,0]])
 '''
 
 ''' Get the threshold '''
+'''
 distances = kdtree.query(con_moving,k=1)[0]
 plt.hist(distances, bins='auto', range=(0,max_range))
 plt.title("After PCA\nTotal distance: {:2f}".format(distances.sum()))
 plt.ylabel("Frequency")
 plt.xlabel("Distance")
-plt.savefig('new_plan/2{:02d}_hist_PCA.png'.format(num), dpi=600)
+plt.show()
+plt.savefig('new_plan/2{:02d}_hist_PCA.png'.format(i), dpi=600)
+'''
 
 ''' Vars '''
 # 6 | 99999
@@ -86,7 +88,7 @@ plt.savefig('new_plan/2{:02d}_hist_PCA.png'.format(num), dpi=600)
 # 3 | 999
 # 2 | 999
 length = len(con_moving)
-threshold=10
+threshold=5
 alpha = 999999
 lamb = 1
 
@@ -161,7 +163,7 @@ print(np.average(acon))
 X = np.array([lsqr(A,B[:,0])[0,6],lsqr(A,B[:,1])[0,6],lsqr(A,B[:,2])[0,6]]).T
 '''
 
-np.save('new_plan/2{:02d}_x.npy'.format(num),X)
+np.save('new_plan/2{:02d}_x.npy'.format(i),X)
 
 hours   = int(( end - start)/3600)
 minutes = int(((end - start)%3600)/60)
@@ -189,5 +191,5 @@ plt.title("After ICP | acon: {}, Total Distance: {:}"
           "{:.1%}".format(count[1][1]/count[1].sum()))
 plt.ylabel("Frequency")
 plt.xlabel("Distance")
-plt.savefig('new_plan/2{:02d}_hist_ICP.png'.format(num), dpi=600)
+plt.savefig('new_plan/2{:02d}_hist_ICP.png'.format(i), dpi=600)
 draw_bundles([new_moving,static],[[0,0,1],[1,0,0]])

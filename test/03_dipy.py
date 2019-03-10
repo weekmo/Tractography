@@ -50,8 +50,8 @@ print("Total distance: {:2f}".format(distances.sum()))
 
 #max_range = max(distances)
 plt.hist(distances, bins='auto',range=(0,max_range))
-plt.title("dipy | Duration: {:02}:{:02}:{:02}\nTotal Distance: {:}"
-          .format(hours,minutes,seconds,round(distances.sum(),2)))
+#plt.title("dipy | Duration: {:02}:{:02}:{:02}\nTotal Distance: {:}"
+#          .format(hours,minutes,seconds,round(distances.sum(),2)))
 plt.ylabel("Frequncy")
 plt.xlabel("Distance")
 plt.savefig('new_plan/1{:02d}_dipy_hist.png'.format(num), dpi=600)

@@ -3,7 +3,6 @@
 1- dipy
 2- Non-linear optimizer
 3- Non rigid ICP
-
  --- Eval ---
  left to right
  1- Distances
@@ -11,6 +10,7 @@
  3- local and global deformation
  x- effect on Co Bundle Map
 """
+
 from time import time
 
 import numpy as np
@@ -24,7 +24,7 @@ from src.tractography.io import read_ply
 from src.tractography.Utils import pca_transform_norm
 from src.tractography.viz import draw_bundles
 
-num = 11
+num = 17
 
 static = read_ply('data/197348/m_ex_atr-left_shore.ply')
 moving = read_ply('data/197348/m_ex_atr-right_shore.ply')
@@ -74,6 +74,7 @@ plt.savefig('new_plan/1{:02d}_hist_PCA.png'.format(num), dpi=600)
 # 3 | 99999
 # 3 | 999
 # 2 | 999
+
 length = len(con_moving)
 threshold=7
 alpha = 9999
@@ -105,6 +106,7 @@ D = sparse.coo_matrix((np.concatenate(new_con_moving),
                 (length,length*4)).tocsr()
 ''' Get WD '''
 WD = W.dot(D)
+
 ''' Get U '''
 # U = con_static[ids]
 ''' Get WD '''

@@ -40,14 +40,14 @@ for track in moving:
     i = end
 
 
-draw_bundles([new_moving,moving],[[0,0,1],[1,0,0]])
+#draw_bundles([new_moving,moving],[[0,0,1],[1,0,0]])
 
 
 
 ''' ICP '''
 static = moving
 moving = new_moving
-draw_bundles([moving,static],[[0,0,1],[1,0,0]])
+#draw_bundles([moving,static],[[0,0,1],[1,0,0]])
 
 
 ''' Get points cloud '''
