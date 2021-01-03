@@ -3,7 +3,7 @@
 
 # Tractograpy
 
-## It is a module deals withe Brain Bundles
+## It is a module deals with Brain Bundles
 
 It includes functions to read/write, visualise and register bundles
 ### "It's always preferred to use source code!"
