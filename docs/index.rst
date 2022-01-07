@@ -6,38 +6,47 @@ Tractograpy
 It is a module deals with Brain Bundles
 ---------------------------------------
 
-It includes functions to read/write, visualise and register bundles ###
-“It’s always preferred to use source code!” ## Installation:
+It includes functions to read/write, visualise and register bundles
 
-Easy to install by downloading install.sh and run it: #### On Linux
+“It’s always preferred to use source code!”
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: commandline
+Installation:
+-------------
+Easy to install by downloading install.sh and run it:
+
+On Linux
+~~~~~~~~
+.. code:: console
 
    ./install.sh
 
 On widows by using bash
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: commandline
+.. code:: console
 
    bash install.sh 
 
 By pip
-^^^^^^
+~~~~~~
 
-.. code:: commandline
+.. code:: console
 
    pip install tractography
 
 By conda
-^^^^^^^^
+~~~~~~~~
 
-.. code:: commandline
+.. code:: console
 
    conda install -c weekmo tractography
 
-Example 1:
-----------
+Examples:
+---------
+
+Example (1)
+~~~~~~~~~~~
 
 Register two bundles
 ^^^^^^^^^^^^^^^^^^^^
@@ -64,7 +73,7 @@ Register two bundles
    draw_bundles([data1,aligned_bundle])
 
 Example 2:
-----------
+~~~~~~~~~~
 
 Show all bundles in a folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
