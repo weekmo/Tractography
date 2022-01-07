@@ -16,27 +16,27 @@ Installation:
 Easy to install by downloading install.sh and run it:
 
 On Linux
-~~~~~~~~
+^^^^^^^^
 .. code:: console
 
    ./install.sh
 
 On widows by using bash
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: console
 
    bash install.sh 
 
 By pip
-~~~~~~
+^^^^^^
 
 .. code:: console
 
    pip install tractography
 
 By conda
-~~~~~~~~
+^^^^^^^^
 
 .. code:: console
 
@@ -45,11 +45,10 @@ By conda
 Examples:
 ---------
 
-Example (1)
-~~~~~~~~~~~
+Example 1:
+^^^^^^^^^^
 
 Register two bundles
-^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -73,10 +72,9 @@ Register two bundles
    draw_bundles([data1,aligned_bundle])
 
 Example 2:
-~~~~~~~~~~
+^^^^^^^^^^
 
 Show all bundles in a folder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
