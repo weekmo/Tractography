@@ -98,5 +98,5 @@ Show all bundles in a folder
 
 Enjoy
 
-.. |license - GPL| image:: https://img.shields.io/aur/license/yaourt.svg
+.. |license - GPL| image:: https://img.shields.io/github/license/fzhu2e/GraphEM
    :target: https://www.gnu.org/licenses/gpl-3.0.txt
