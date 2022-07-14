@@ -1,9 +1,10 @@
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 
 # Tractograpy
-
 ## It is a module deals with Brain Bundles
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 It includes functions to read/write, visualise and register bundles
 ### "It's always preferred to use source code!"
